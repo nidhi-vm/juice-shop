@@ -5,18 +5,15 @@
 
 .btn-pay {
   display: block;
-  margin-top: 10px;
   margin-top: 20px;
   padding: 10px;
   width: 100%;
-
 }
 
 mat-card {
   height: auto;
   margin-bottom: -10px !important;
   margin-top: 20px;
-
 }
 
 mat-cell {
@@ -47,7 +44,6 @@ table {
   margin-bottom: 15px;
   padding-bottom: 10px;
   padding-left: 10px;
-  
 }
 
 .bonus-points {
@@ -55,14 +51,12 @@ table {
   text-align: center;
 }
 
-
 .mdc-card { 
   border: 0;
   border-bottom: 0;
   margin-top: -5px;
   padding: 5px;
   width: 100%;
-
 }
 
 .mat-own-card {
@@ -71,7 +65,6 @@ table {
   max-width: 1200px;
   padding: 20px;
   width: 60% !important;
-
 }
 
 .mat-table .mat-row,
@@ -79,39 +72,18 @@ table {
   border-bottom: 1px solid var(--theme-background-light);
   border-radius: 5px !important;
   padding: 10px 0;
-
 }
 
 .mat-table {
   border-collapse: collapse;
-    
-}
-  
-.mat-cell,
-.mat-footer-cell {
-  padding: 12px 0; 
-
-}
-
-::ng-deep .mat-mdc-cell.mdc-data-table__cell.cdk-cell {
-  border: 0 !important;
-
-}
-
-
-.mat-table {
   background: transparent;
   width: 100%;
 }
 
-.mat-row {
-  border-bottom: 1px solid var(--theme-background-light);
-}
-
 .mat-cell,
 .mat-footer-cell {
+  padding: 12px 0; 
   color: var(--theme-text);
-  padding: 12px 0;
 }
 
 .mat-footer-cell.label {
@@ -131,4 +103,3 @@ table {
   margin-top: 10px;
   text-align: center;
 }
-
