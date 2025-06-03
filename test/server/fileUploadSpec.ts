@@ -23,18 +23,20 @@ describe('fileUpload', () => {
     })
   })
 
+  const testUploadSizeChallenge = (size: number) => {
+    it(`${size} bytes`, () => {
+      challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
+      req.file.size = size
+
+      checkUploadSize(req, res, () => {})
+
+      expect(challenges.uploadSizeChallenge.solved).to.equal(false)
+    })
+  }
+
   describe('should not solve "uploadSizeChallenge" when file size is', () => {
     const sizes = [0, 1, 100, 1000, 10000, 99999, 100000]
-    sizes.forEach(size => {
-      it(`${size} bytes`, () => {
-        challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
-        req.file.size = size
-
-        checkUploadSize(req, res, () => {})
-
-        expect(challenges.uploadSizeChallenge.solved).to.equal(false)
-      })
-    })
+    sizes.forEach(testUploadSizeChallenge)
   })
 
   it('should solve "uploadSizeChallenge" when file size exceeds 100000 bytes', () => {
