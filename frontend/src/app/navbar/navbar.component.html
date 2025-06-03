@@ -13,7 +13,7 @@
     </button>
 
     <button mat-button routerLink="/search" style="height:60px;" class="buttons" aria-label="Back to homepage">
-      <div id="homeButton">
+      <div id="homeButton" tabindex="0" (keydown)="onKeyPress($event)">
         <img [src]="logoSrc" class="logo" alt={{applicationName}}>
         <span fxHide.lt-sm fxShow style="font-size: x-large"> {{applicationName}} </span>
       </div>
