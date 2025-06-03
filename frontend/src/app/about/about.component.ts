@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
- * SPDX-License-Identifier: MIT
- */
-
 import { Component, type OnInit } from '@angular/core'
 import { DomSanitizer } from '@angular/platform-browser'
 import { ConfigurationService } from '../Services/configuration.service'
@@ -75,33 +70,21 @@ export class AboutComponent implements OnInit {
           return EMPTY
         })
       ).subscribe((config) => {
-        if (config?.application?.social) {
-          if (config.application.social.blueSkyUrl) {
-            this.blueSkyUrl = config.application.social.blueSkyUrl
-          }
-          if (config.application.social.mastodonUrl) {
-            this.mastodonUrl = config.application.social.mastodonUrl
-          }
-          if (config.application.social.twitterUrl) {
-            this.twitterUrl = config.application.social.twitterUrl
-          }
-          if (config.application.social.facebookUrl) {
-            this.facebookUrl = config.application.social.facebookUrl
-          }
-          if (config.application.social.slackUrl) {
-            this.slackUrl = config.application.social.slackUrl
-          }
-          if (config.application.social.redditUrl) {
-            this.redditUrl = config.application.social.redditUrl
-          }
-          if (config.application.social.pressKitUrl) {
-            this.pressKitUrl = config.application.social.pressKitUrl
-          }
-          if (config.application.social.nftUrl) {
-            this.nftUrl = config.application.social.nftUrl
-          }
-        }
+        this.setSocialUrls(config?.application?.social)
       })
+  }
+
+  private setSocialUrls(socialConfig: any): void {
+    if (socialConfig) {
+      this.blueSkyUrl = socialConfig.blueSkyUrl
+      this.mastodonUrl = socialConfig.mastodonUrl
+      this.twitterUrl = socialConfig.twitterUrl
+      this.facebookUrl = socialConfig.facebookUrl
+      this.slackUrl = socialConfig.slackUrl
+      this.redditUrl = socialConfig.redditUrl
+      this.pressKitUrl = socialConfig.pressKitUrl
+      this.nftUrl = socialConfig.nftUrl
+    }
   }
 
   populateSlideshowFromFeedbacks () {
@@ -114,20 +97,18 @@ export class AboutComponent implements OnInit {
         })
       )
       .subscribe((feedbacks) => {
-        for (let i = 0; i < feedbacks.length; i++) {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          feedbacks[i].comment = `<span style="width: 90%; display:block;">${
-            feedbacks[i].comment
-          }<br/> (${this.stars[feedbacks[i].rating]})</span>`
-          feedbacks[i].comment = this.sanitizer.bypassSecurityTrustHtml(
-            feedbacks[i].comment
-          )
-
+        feedbacks.forEach((feedback, index) => {
+          feedback.comment = this.formatFeedbackComment(feedback)
           this.galleryRef.addImage({
-            src: this.images[i % this.images.length],
-            args: feedbacks[i].comment
+            src: this.images[index % this.images.length],
+            args: feedback.comment
           })
-        }
+        })
       })
+  }
+
+  private formatFeedbackComment(feedback: any): any {
+    const comment = `<span style="width: 90%; display:block;">${feedback.comment}<br/> (${this.stars[feedback.rating]})</span>`
+    return this.sanitizer.bypassSecurityTrustHtml(comment)
   }
 }
