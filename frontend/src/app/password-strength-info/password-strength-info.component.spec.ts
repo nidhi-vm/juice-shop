@@ -1,5 +1,4 @@
 import { type ComponentFixture, TestBed } from '@angular/core/testing'
-
 import { PasswordStrengthInfoComponent } from './password-strength-info.component'
 
 describe('PasswordStrengthInfoComponent', () => {
@@ -8,7 +7,7 @@ describe('PasswordStrengthInfoComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PasswordStrengthInfoComponent]
+      declarations: [PasswordStrengthInfoComponent]
     })
       .compileComponents()
 
@@ -17,9 +16,27 @@ describe('PasswordStrengthInfoComponent', () => {
     fixture.detectChanges()
   })
 
-  xit('should create', () => {
+  it('should create', () => {
     expect(component).toBeTruthy()
   })
 
-  // todo: unit test each conditional | passwordLength message
+  it('should return "Too short" for password length less than 6', () => {
+    component.passwordLength = 5;
+    expect(component.getPasswordStrengthMessage()).toEqual('Too short');
+  });
+
+  it('should return "Weak" for password length between 6 and 10', () => {
+    component.passwordLength = 8;
+    expect(component.getPasswordStrengthMessage()).toEqual('Weak');
+  });
+
+  it('should return "Moderate" for password length between 11 and 14', () => {
+    component.passwordLength = 12;
+    expect(component.getPasswordStrengthMessage()).toEqual('Moderate');
+  });
+
+  it('should return "Strong" for password length greater than 14', () => {
+    component.passwordLength = 15;
+    expect(component.getPasswordStrengthMessage()).toEqual('Strong');
+  });
 })
