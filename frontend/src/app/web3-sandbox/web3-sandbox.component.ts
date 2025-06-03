@@ -21,7 +21,6 @@ import { FormsModule } from '@angular/forms'
 import { CodemirrorModule } from '@ctrl/ngx-codemirror'
 import { MatIconModule } from '@angular/material/icon'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const client = createClient({
   autoConnect: true,
   provider: getDefaultProvider()
@@ -115,6 +114,7 @@ contract HelloWorld {
       }
     } catch (error) {
       console.error('Error compiling contracts:', error)
+      throw error
     }
   }
 
@@ -172,6 +172,7 @@ contract HelloWorld {
       console.log(this.contractFunctions)
     } catch (error) {
       console.error('Error deploying contract:', error)
+      throw error
     }
   }
 
@@ -255,6 +256,7 @@ contract HelloWorld {
           this.contractFunctions[index] = updatedFunc
         }
       }
+      throw error
     }
   }
 
@@ -310,7 +312,7 @@ contract HelloWorld {
       console.log('session', this.session)
       this.changeDetectorRef.detectChanges()
     } catch (err) {
-      console.log('An error occurred')
+      console.error('An error occurred', err)
     }
   }
 }
