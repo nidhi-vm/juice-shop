@@ -8,6 +8,12 @@ mat-toolbar {
   min-width: 100%;
   padding: 4px 0;
   width: 100%;
+
+  mat-icon {
+    font-size: 23px;
+    height: 24px;
+    width: 24px;
+  }
 }
 
 .mat-mdc-button {
@@ -20,14 +26,6 @@ mat-toolbar {
   height: 26px;
   margin-right: 2px;
   width: 26px;
-}
-
-mat-toolbar {
-  mat-icon {
-    font-size: 23px;
-    height: 24px;
-    width: 24px;
-  }
 }
 
 .warn-notification {
