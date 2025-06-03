@@ -8,6 +8,18 @@ describe('/#/complain', () => {
     cy.visit('/#/complain')
   })
 
+  const uploadFile = async (fileName, fileType, content) => {
+    const data = new FormData()
+    const blob = new Blob([content], { type: fileType })
+    data.append('file', blob, fileName)
+
+    await fetch(`${Cypress.config('baseUrl')}/file-upload`, {
+      method: 'POST',
+      cache: 'no-cache',
+      body: data
+    })
+  }
+
   describe('challenge "uploadSize"', () => {
     it('should be possible to upload files greater 100 KB directly through backend', () => {
       cy.window().then(async () => {
@@ -15,16 +27,7 @@ describe('/#/complain', () => {
           String.prototype.valueOf,
           '1234567890'
         )
-        const blob = new Blob(over100KB, { type: 'application/pdf' })
-
-        const data = new FormData()
-        data.append('file', blob, 'invalidSizeForClient.pdf')
-
-        await fetch(`${Cypress.config('baseUrl')}/file-upload`, {
-          method: 'POST',
-          cache: 'no-cache',
-          body: data
-        })
+        await uploadFile('invalidSizeForClient.pdf', 'application/pdf', over100KB)
       })
       cy.expectChallengeSolved({ challenge: 'Upload Size' })
     })
@@ -33,15 +36,7 @@ describe('/#/complain', () => {
   describe('challenge "uploadType"', () => {
     it('should be possible to upload files with other extension than .pdf directly through backend', () => {
       cy.window().then(async () => {
-        const data = new FormData()
-        const blob = new Blob(['test'], { type: 'application/x-msdownload' })
-        data.append('file', blob, 'invalidTypeForClient.exe')
-
-        await fetch(`${Cypress.config('baseUrl')}/file-upload`, {
-          method: 'POST',
-          cache: 'no-cache',
-          body: data
-        })
+        await uploadFile('invalidTypeForClient.exe', 'application/x-msdownload', 'test')
       })
       cy.expectChallengeSolved({ challenge: 'Upload Type' })
     })
@@ -56,25 +51,23 @@ describe('/#/complain', () => {
     })
   })
 
+  const handleDockerCheck = (message, filePath) => {
+    cy.task('isDocker').then((isDocker) => {
+      if (!isDocker) {
+        cy.get('#complaintMessage').type(message)
+        cy.get('#file').selectFile(filePath)
+        cy.get('#submitButton').click()
+      }
+    })
+  }
+
   describe('challenge "xxeFileDisclosure"', () => {
     it('(triggered for Windows server via .xml upload with XXE attack)', () => {
-      cy.task('isDocker').then((isDocker) => {
-        if (!isDocker) {
-          cy.get('#complaintMessage').type('XXE File Exfiltration Windows!')
-          cy.get('#file').selectFile('test/files/xxeForWindows.xml')
-          cy.get('#submitButton').click()
-        }
-      })
+      handleDockerCheck('XXE File Exfiltration Windows!', 'test/files/xxeForWindows.xml')
     })
 
     it('(triggered for Linux server via .xml upload with XXE attack)', () => {
-      cy.task('isDocker').then((isDocker) => {
-        if (!isDocker) {
-          cy.get('#complaintMessage').type('XXE File Exfiltration Linux!')
-          cy.get('#file').selectFile('test/files/xxeForLinux.xml')
-          cy.get('#submitButton').click()
-        }
-      })
+      handleDockerCheck('XXE File Exfiltration Linux!', 'test/files/xxeForLinux.xml')
     })
 
     it('should be solved either through Windows- or Linux-specific attack path', () => {
@@ -88,28 +81,16 @@ describe('/#/complain', () => {
 
   describe('challenge "xxeDos"', () => {
     it('(triggered via .xml upload with dev/random attack)', () => {
-      cy.task('isDocker').then((isDocker) => {
-        if (!isDocker) {
-          cy.get('#complaintMessage').type('XXE Dev Random!')
-          cy.get('#file').selectFile('test/files/xxeDevRandom.xml')
-          cy.get('#submitButton').click()
-          cy.wait(5000) // Wait for 2.5x timeout of XML parser
-        }
-      })
+      handleDockerCheck('XXE Dev Random!', 'test/files/xxeDevRandom.xml')
+      cy.wait(5000) // Wait for 2.5x timeout of XML parser
     })
 
     it('(triggered via .xml upload with Quadratic Blowup attack)', () => {
-      cy.task('isDocker').then((isDocker) => {
-        if (!isDocker) {
-          cy.get('#complaintMessage').type('XXE Quadratic Blowup!')
-          cy.get('#file').selectFile('test/files/xxeQuadraticBlowup.xml')
-          cy.get('#submitButton').click()
-          cy.wait(5000) // Wait for 2.5x timeout of XML parser
-        }
-      })
+      handleDockerCheck('XXE Quadratic Blowup!', 'test/files/xxeQuadraticBlowup.xml')
+      cy.wait(5000) // Wait for 2.5x timeout of XML parser
     })
 
-    xit('should be solved either through dev/random or Quadratic Blowup attack', () => { // FIXME Unreliable during CI/CD as sometimes the Quadratic Blowup is blocked for entity loops
+    xit('should be solved either through dev/random or Quadratic Blowup attack', () => {
       cy.task('isDocker').then((isDocker) => {
         if (!isDocker) {
           cy.expectChallengeSolved({ challenge: 'XXE DoS' })
@@ -120,28 +101,16 @@ describe('/#/complain', () => {
 
   describe('challenge "yamlBomb"', () => {
     it('should be solved via .yaml upload with a Billion Laughs-style attack', () => {
-      cy.task('isDocker').then((isDocker) => {
-        if (!isDocker) {
-          cy.get('#complaintMessage').type('YAML Bomb!')
-          cy.get('#file').selectFile('test/files/yamlBomb.yml')
-          cy.get('#submitButton').click()
-          cy.wait(5000) // Wait for 2.5x possible timeout of YAML parser
-          cy.expectChallengeSolved({ challenge: 'Memory Bomb' })
-        }
-      })
+      handleDockerCheck('YAML Bomb!', 'test/files/yamlBomb.yml')
+      cy.wait(5000) // Wait for 2.5x possible timeout of YAML parser
+      cy.expectChallengeSolved({ challenge: 'Memory Bomb' })
     })
   })
 
   describe('challenge "arbitraryFileWrite"', () => {
     it('should be possible to upload zip file with filenames having path traversal', () => {
-      cy.task('isDocker').then((isDocker) => {
-        if (!isDocker) {
-          cy.get('#complaintMessage').type('Zip Slip!')
-          cy.get('#file').selectFile('test/files/arbitraryFileWrite.zip')
-          cy.get('#submitButton').click()
-          cy.expectChallengeSolved({ challenge: 'Arbitrary File Write' })
-        }
-      })
+      handleDockerCheck('Zip Slip!', 'test/files/arbitraryFileWrite.zip')
+      cy.expectChallengeSolved({ challenge: 'Arbitrary File Write' })
     })
   })
 
