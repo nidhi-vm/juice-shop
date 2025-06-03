@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
- * SPDX-License-Identifier: MIT
- */
-
 import fs from 'node:fs'
 import pug from 'pug'
 import config from 'config'
@@ -17,60 +12,71 @@ import * as utils from '../lib/utils'
 const entities = new Entities()
 
 export const getVideo = () => {
-  return (req: Request, res: Response) => {
-    const path = videoPath()
-    const stat = fs.statSync(path)
-    const fileSize = stat.size
-    const range = req.headers.range
-    if (range) {
-      const parts = range.replace(/bytes=/, '').split('-')
-      const start = parseInt(parts[0], 10)
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
-      const chunksize = (end - start) + 1
-      const file = fs.createReadStream(path, { start, end })
-      const head = {
-        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunksize,
-        'Content-Location': '/assets/public/videos/owasp_promo.mp4',
-        'Content-Type': 'video/mp4'
+  return async (req: Request, res: Response) => {
+    try {
+      const path = videoPath()
+      const stat = fs.statSync(path)
+      const fileSize = stat.size
+      const range = req.headers.range
+      if (range) {
+        const parts = range.replace(/bytes=/, '').split('-')
+        const start = parseInt(parts[0], 10)
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
+        const chunksize = (end - start) + 1
+        const file = fs.createReadStream(path, { start, end })
+        const head = {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Location': '/assets/public/videos/owasp_promo.mp4',
+          'Content-Type': 'video/mp4'
+        }
+        res.writeHead(206, head)
+        file.pipe(res)
+      } else {
+        const head = {
+          'Content-Length': fileSize,
+          'Content-Type': 'video/mp4'
+        }
+        res.writeHead(200, head)
+        fs.createReadStream(path).pipe(res)
       }
-      res.writeHead(206, head)
-      file.pipe(res)
-    } else {
-      const head = {
-        'Content-Length': fileSize,
-        'Content-Type': 'video/mp4'
-      }
-      res.writeHead(200, head)
-      fs.createReadStream(path).pipe(res)
+    } catch (error) {
+      res.status(500).send('Internal Server Error')
     }
   }
 }
 
 export const promotionVideo = () => {
-  return (req: Request, res: Response) => {
-    fs.readFile('views/promotionVideo.pug', function (err, buf) {
-      if (err != null) throw err
-      let template = buf.toString()
-      const subs = getSubsFromFile()
+  return async (req: Request, res: Response) => {
+    try {
+      fs.readFile('views/promotionVideo.pug', function (err, buf) {
+        if (err) {
+          res.status(500).send('Internal Server Error')
+          return
+        }
+        let template = buf.toString()
+        const subs = getSubsFromFile()
 
-      challengeUtils.solveIf(challenges.videoXssChallenge, () => { return utils.contains(subs, '</script><script>alert(`xss`)</script>') })
+        challengeUtils.solveIf(challenges.videoXssChallenge, () => { return utils.contains(subs, '</script><script>alert(`xss`)</script>') })
 
-      const themeKey = config.get<string>('application.theme') as keyof typeof themes
-      const theme = themes[themeKey] || themes['bluegrey-lightgreen']
-      template = template.replace(/_title_/g, entities.encode(config.get<string>('application.name')))
-      template = template.replace(/_favicon_/g, favicon())
-      template = template.replace(/_bgColor_/g, theme.bgColor)
-      template = template.replace(/_textColor_/g, theme.textColor)
-      template = template.replace(/_navColor_/g, theme.navColor)
-      template = template.replace(/_primLight_/g, theme.primLight)
-      template = template.replace(/_primDark_/g, theme.primDark)
-      const fn = pug.compile(template)
-      let compiledTemplate = fn()
-      compiledTemplate = compiledTemplate.replace('<script id="subtitle"></script>', '<script id="subtitle" type="text/vtt" data-label="English" data-lang="en">' + subs + '</script>')
-      res.send(compiledTemplate)
-    })
+        const themeKey = config.get<string>('application.theme') as keyof typeof themes
+        const theme = themes[themeKey] || themes['bluegrey-lightgreen']
+        template = template.replace(/_title_/g, entities.encode(config.get<string>('application.name')))
+        template = template.replace(/_favicon_/g, favicon())
+        template = template.replace(/_bgColor_/g, theme.bgColor)
+        template = template.replace(/_textColor_/g, theme.textColor)
+        template = template.replace(/_navColor_/g, theme.navColor)
+        template = template.replace(/_primLight_/g, theme.primLight)
+        template = template.replace(/_primDark_/g, theme.primDark)
+        const fn = pug.compile(template)
+        let compiledTemplate = fn()
+        compiledTemplate = compiledTemplate.replace('<script id="subtitle"></script>', '<script id="subtitle" type="text/vtt" data-label="English" data-lang="en">' + subs + '</script>')
+        res.send(compiledTemplate)
+      })
+    } catch (error) {
+      res.status(500).send('Internal Server Error')
+    }
   }
   function favicon () {
     return utils.extractFilename(config.get('application.favicon'))
