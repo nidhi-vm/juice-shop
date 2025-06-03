@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
- * SPDX-License-Identifier: MIT
- */
-
 import { TranslateService, TranslateModule } from '@ngx-translate/core'
 import { ChallengeService } from '../Services/challenge.service'
 import { ChangeDetectorRef, Component, NgZone, type OnInit } from '@angular/core'
@@ -32,40 +27,49 @@ export class ServerStartedNotificationComponent implements OnInit {
 
   ngOnInit (): void {
     this.ngZone.runOutsideAngular(() => {
-      this.io.socket().on('server started', () => {
-        const continueCode = this.cookieService.get('continueCode')
-        const continueCodeFindIt = this.cookieService.get('continueCodeFindIt')
-        const continueCodeFixIt = this.cookieService.get('continueCodeFixIt')
-        if (continueCode) {
-          this.challengeService.restoreProgress(encodeURIComponent(continueCode)).subscribe(() => {
-            this.translate.get('AUTO_RESTORED_PROGRESS').subscribe((notificationServerStarted) => {
-              this.hackingProgress.autoRestoreMessage = notificationServerStarted
-            }, (translationId) => {
-              this.hackingProgress.autoRestoreMessage = translationId
-            })
-          }, (error) => {
-            console.log(error)
-            this.translate.get('AUTO_RESTORE_PROGRESS_FAILED', { error }).subscribe((notificationServerStarted) => {
-              this.hackingProgress.autoRestoreMessage = notificationServerStarted
-            }, (translationId) => {
-              this.hackingProgress.autoRestoreMessage = translationId
-            })
-          })
-        }
-        if (continueCodeFindIt) {
-          this.challengeService.restoreProgressFindIt(encodeURIComponent(continueCodeFindIt)).subscribe(() => {
-          }, (error) => {
-            console.log(error)
-          })
-        }
-        if (continueCodeFixIt) {
-          this.challengeService.restoreProgressFixIt(encodeURIComponent(continueCodeFixIt)).subscribe(() => {
-          }, (error) => {
-            console.log(error)
-          })
-        }
-        this.ref.detectChanges()
-      })
+      this.io.socket().on('server started', this.handleServerStarted.bind(this))
+    })
+  }
+
+  private handleServerStarted(): void {
+    this.restoreProgressFromCookies()
+    this.ref.detectChanges()
+  }
+
+  private restoreProgressFromCookies(): void {
+    const continueCode = this.cookieService.get('continueCode')
+    const continueCodeFindIt = this.cookieService.get('continueCodeFindIt')
+    const continueCodeFixIt = this.cookieService.get('continueCodeFixIt')
+
+    if (continueCode) {
+      this.restoreProgress(continueCode, this.challengeService.restoreProgress, 'AUTO_RESTORED_PROGRESS', 'AUTO_RESTORE_PROGRESS_FAILED')
+    }
+    if (continueCodeFindIt) {
+      this.restoreProgress(continueCodeFindIt, this.challengeService.restoreProgressFindIt, null, null)
+    }
+    if (continueCodeFixIt) {
+      this.restoreProgress(continueCodeFixIt, this.challengeService.restoreProgressFixIt, null, null)
+    }
+  }
+
+  private restoreProgress(code: string, restoreMethod: (code: string) => any, successMessageKey: string | null, errorMessageKey: string | null): void {
+    restoreMethod(encodeURIComponent(code)).subscribe(() => {
+      if (successMessageKey) {
+        this.translate.get(successMessageKey).subscribe((notification) => {
+          this.hackingProgress.autoRestoreMessage = notification
+        }, (translationId) => {
+          this.hackingProgress.autoRestoreMessage = translationId
+        })
+      }
+    }, (error) => {
+      console.log(error)
+      if (errorMessageKey) {
+        this.translate.get(errorMessageKey, { error }).subscribe((notification) => {
+          this.hackingProgress.autoRestoreMessage = notification
+        }, (translationId) => {
+          this.hackingProgress.autoRestoreMessage = translationId
+        })
+      }
     })
   }
 
