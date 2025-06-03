@@ -60,6 +60,6 @@ export class PasswordStrengthComponent implements OnChanges {
   }
 
   get containAtLeastOneSpecialChar (): boolean {
-    return /^(?=.*?[" !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"])/.test(this.password)
+    return /^(?=.*?[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])/.test(this.password)
   }
 }
