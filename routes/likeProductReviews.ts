@@ -39,8 +39,8 @@ export function likeProductReviews () {
 
       // Artificial wait for timing attack challenge
       await sleep(150)
-      try {
-        const updatedReview: Review = await db.reviewsCollection.findOne({ _id: id })
+      const updatedReview: Review = await db.reviewsCollection.findOne({ _id: id })
+      if (updatedReview) {
         const updatedLikedBy = updatedReview.likedBy
         updatedLikedBy.push(user.data.email)
 
@@ -52,11 +52,11 @@ export function likeProductReviews () {
           { $set: { likedBy: updatedLikedBy } }
         )
         res.json(result)
-      } catch (err) {
-        res.status(500).json(err)
+      } else {
+        res.status(404).json({ error: 'Review not found after update' })
       }
     } catch (err) {
-      res.status(400).json({ error: 'Wrong Params' })
+      res.status(500).json({ error: 'Internal Server Error' })
     }
   }
 }
