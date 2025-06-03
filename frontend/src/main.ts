@@ -48,7 +48,6 @@ import { GalleryModule } from 'ng-gallery';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { Routing } from './app/app.routing';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
