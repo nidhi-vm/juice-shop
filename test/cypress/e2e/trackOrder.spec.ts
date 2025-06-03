@@ -2,23 +2,32 @@ describe('/#/track-order', () => {
   describe('challenge "reflectedXss"', () => {
     // Cypress alert bug
     xit('Order Id should be susceptible to reflected XSS attacks', () => {
-      cy.task('isDocker').then((isDocker) => {
-        if (!isDocker) {
-          cy.on('uncaught:exception', (_err, _runnable) => {
-            return false
-          })
+      checkDockerAndRunTest();
+    });
+  });
+});
 
-          cy.visit('/#/track-result')
-          cy.visit('/#/track-result?id=<iframe src="javascript:alert(`xss`)">')
-          cy.reload()
+function checkDockerAndRunTest() {
+  cy.task('isDocker').then((isDocker) => {
+    if (!isDocker) {
+      handleUncaughtException();
+      visitTrackResult();
+      cy.reload();
+      cy.on('window:alert', (t) => {
+        expect(t).to.equal('xss');
+      });
+      cy.expectChallengeSolved({ challenge: 'Reflected XSS' });
+    }
+  });
+}
 
-          cy.on('window:alert', (t) => {
-            expect(t).to.equal('xss')
-          })
+function handleUncaughtException() {
+  cy.on('uncaught:exception', (_err, _runnable) => {
+    return false;
+  });
+}
 
-          cy.expectChallengeSolved({ challenge: 'Reflected XSS' })
-        }
-      })
-    })
-  })
-})
+function visitTrackResult() {
+  cy.visit('/#/track-result');
+  cy.visit('/#/track-result?id=<iframe src="javascript:alert(`xss`)">');
+}
