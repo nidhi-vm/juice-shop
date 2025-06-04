@@ -25,42 +25,36 @@ describe('fileUpload', () => {
 
   describe('should not solve "uploadSizeChallenge" when file size is', () => {
     const sizes = [0, 1, 100, 1000, 10000, 99999, 100000]
-    sizes.forEach(size => {
-      it(`${size} bytes`, () => {
-        challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
-        req.file.size = size
-
-        checkUploadSize(req, res, () => {})
-
-        expect(challenges.uploadSizeChallenge.solved).to.equal(false)
-      })
-    })
+    sizes.forEach(size => testUploadSizeChallenge(size, false))
   })
 
   it('should solve "uploadSizeChallenge" when file size exceeds 100000 bytes', () => {
-    challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
-    req.file.size = 100001
-
-    checkUploadSize(req, res, () => {})
-
-    expect(challenges.uploadSizeChallenge.solved).to.equal(true)
+    testUploadSizeChallenge(100001, true)
   })
 
   it('should solve "uploadTypeChallenge" when file type is not PDF', () => {
-    challenges.uploadTypeChallenge = { solved: false, save } as unknown as Challenge
-    req.file.originalname = 'hack.exe'
-
-    checkFileType(req, res, () => {})
-
-    expect(challenges.uploadTypeChallenge.solved).to.equal(true)
+    testUploadTypeChallenge('hack.exe', true)
   })
 
   it('should not solve "uploadTypeChallenge" when file type is PDF', () => {
+    testUploadTypeChallenge('hack.pdf', false)
+  })
+
+  function testUploadSizeChallenge(size: number, expected: boolean) {
+    challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
+    req.file.size = size
+
+    checkUploadSize(req, res, () => {})
+
+    expect(challenges.uploadSizeChallenge.solved).to.equal(expected)
+  }
+
+  function testUploadTypeChallenge(filename: string, expected: boolean) {
     challenges.uploadTypeChallenge = { solved: false, save } as unknown as Challenge
-    req.file.originalname = 'hack.pdf'
+    req.file.originalname = filename
 
     checkFileType(req, res, () => {})
 
-    expect(challenges.uploadTypeChallenge.solved).to.equal(false)
-  })
+    expect(challenges.uploadTypeChallenge.solved).to.equal(expected)
+  }
 })
