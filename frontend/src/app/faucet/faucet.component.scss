@@ -89,6 +89,7 @@
     margin-top: -20px;
     padding: 16px 24px;
     width: 300px;
+    height: 68px;
   }
 }
 
@@ -134,9 +135,6 @@
   
 }
 
-.withdraw-container button {
-  height: 68px;
-}
 @media (max-width: 1100px) {
   .container {
     flex-direction: column;
