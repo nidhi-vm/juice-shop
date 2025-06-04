@@ -56,10 +56,10 @@ export class PasswordStrengthComponent implements OnChanges {
   }
 
   get containAtLeastOneDigit (): boolean {
-    return /^(?=.*?[0-9])/.test(this.password)
+    return /^(?=.*?\d)/.test(this.password)
   }
 
   get containAtLeastOneSpecialChar (): boolean {
-    return /^(?=.*?[" !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"])/.test(this.password)
+    return /^(?=.*?[" !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])/).test(this.password)
   }
 }
