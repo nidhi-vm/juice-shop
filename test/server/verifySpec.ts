@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
- * SPDX-License-Identifier: MIT
- */
-
 import chai from 'chai'
 import sinon from 'sinon'
 import config from 'config'
@@ -162,17 +157,15 @@ describe('verify', () => {
       expect(challenges.errorHandlingChallenge.solved).to.equal(true)
     })
 
-    describe('is solved when an error occurs on a response with error', () => {
-      const httpStatus = [402, 403, 404, 500]
-      httpStatus.forEach(statusCode => {
-        it(`${statusCode} status code`, () => {
-          res.statusCode = statusCode
-          err = new Error()
+    const httpStatus = [402, 403, 404, 500]
+    httpStatus.forEach(statusCode => {
+      it(`is solved when an error occurs on a response with ${statusCode} status code`, () => {
+        res.statusCode = statusCode
+        err = new Error()
 
-          verify.errorHandlingChallenge()(err, req, res, next)
+        verify.errorHandlingChallenge()(err, req, res, next)
 
-          expect(challenges.errorHandlingChallenge.solved).to.equal(true)
-        })
+        expect(challenges.errorHandlingChallenge.solved).to.equal(true)
       })
     })
 
@@ -185,17 +178,15 @@ describe('verify', () => {
       expect(challenges.errorHandlingChallenge.solved).to.equal(false)
     })
 
-    describe('is not solved when no error occurs on a response with error', () => {
-      const httpStatus = [401, 402, 404, 500]
-      httpStatus.forEach(statusCode => {
-        it(`${statusCode} status code`, () => {
-          res.statusCode = statusCode
-          err = undefined
+    const errorStatus = [401, 402, 404, 500]
+    errorStatus.forEach(statusCode => {
+      it(`is not solved when no error occurs on a response with ${statusCode} status code`, () => {
+        res.statusCode = statusCode
+        err = undefined
 
-          verify.errorHandlingChallenge()(err, req, res, next)
+        verify.errorHandlingChallenge()(err, req, res, next)
 
-          expect(challenges.errorHandlingChallenge.solved).to.equal(false)
-        })
+        expect(challenges.errorHandlingChallenge.solved).to.equal(false)
       })
     })
 
@@ -256,10 +247,6 @@ describe('verify', () => {
     })
 
     it('"jwtUnsignedChallenge" is solved when forged unsigned token has email jwtn3d@juice-sh.op in the payload', () => {
-      /*
-      Header: { "alg": "none", "typ": "JWT" }
-      Payload: { "data": { "email": "jwtn3d@juice-sh.op" }, "iat": 1508639612, "exp": 9999999999 }
-       */
       req.headers = { authorization: 'Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJkYXRhIjp7ImVtYWlsIjoiand0bjNkQGp1aWNlLXNoLm9wIn0sImlhdCI6MTUwODYzOTYxMiwiZXhwIjo5OTk5OTk5OTk5fQ.' }
 
       verify.jwtChallenges()(req, res, next)
@@ -268,10 +255,6 @@ describe('verify', () => {
     })
 
     it('"jwtUnsignedChallenge" is solved when forged unsigned token has string "jwtn3d@" in the payload', () => {
-      /*
-      Header: { "alg": "none", "typ": "JWT" }
-      Payload: { "data": { "email": "jwtn3d@" }, "iat": 1508639612, "exp": 9999999999 }
-       */
       req.headers = { authorization: 'Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJkYXRhIjp7ImVtYWlsIjoiand0bjNkQCJ9LCJpYXQiOjE1MDg2Mzk2MTIsImV4cCI6OTk5OTk5OTk5OX0.' }
 
       verify.jwtChallenges()(req, res, next)
@@ -290,10 +273,6 @@ describe('verify', () => {
 
     if (utils.isChallengeEnabled(challenges.jwtForgedChallenge)) {
       it('"jwtForgedChallenge" is solved when forged token HMAC-signed with public RSA-key has email rsa_lord@juice-sh.op in the payload', () => {
-        /*
-        Header: { "alg": "HS256", "typ": "JWT" }
-        Payload: { "data": { "email": "rsa_lord@juice-sh.op" }, "iat": 1508639612, "exp": 9999999999 }
-         */
         req.headers = { authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImVtYWlsIjoicnNhX2xvcmRAanVpY2Utc2gub3AifSwiaWF0IjoxNTgyMjIxNTc1fQ.ycFwtqh4ht4Pq9K5rhiPPY256F9YCTIecd4FHFuSEAg' }
 
         verify.jwtChallenges()(req, res, next)
@@ -302,10 +281,6 @@ describe('verify', () => {
       })
 
       it('"jwtForgedChallenge" is solved when forged token HMAC-signed with public RSA-key has string "rsa_lord@" in the payload', () => {
-        /*
-        Header: { "alg": "HS256", "typ": "JWT" }
-        Payload: { "data": { "email": "rsa_lord@" }, "iat": 1508639612, "exp": 9999999999 }
-         */
         req.headers = { authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7ImVtYWlsIjoicnNhX2xvcmRAIn0sImlhdCI6MTU4MjIyMTY3NX0.50f6VAIQk2Uzpf3sgH-1JVrrTuwudonm2DKn2ec7Tg8' }
 
         verify.jwtChallenges()(req, res, next)
@@ -317,10 +292,4 @@ describe('verify', () => {
         const token = security.authorize({ data: { email: 'rsa_lord@juice-sh.op' } })
         req.headers = { authorization: `Bearer ${token}` }
 
-        verify.jwtChallenges()(req, res, next)
-
-        expect(challenges.jwtForgedChallenge.solved).to.equal(false)
-      })
-    }
-  })
-})
+        verify.jwtChallenges()(req,
