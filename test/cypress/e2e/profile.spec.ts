@@ -2,10 +2,10 @@ describe('/profile', () => {
   beforeEach(() => {
     cy.login({ email: 'admin', password: 'admin123' })
   })
-  describe('challenge "ssrf"', () => {
+
+  const testSSRF = () => {
     it('should be possible to request internal resources using image upload URL', () => {
       cy.visit('/profile')
-
       cy.get('#url').type(
         `${Cypress.config('baseUrl')}/solve/challenges/server-side?key=tRy_H4rd3r_n0thIng_iS_Imp0ssibl3`
       )
@@ -13,9 +13,9 @@ describe('/profile', () => {
       cy.visit('/')
       cy.expectChallengeSolved({ challenge: 'SSRF' })
     })
-  })
+  }
 
-  describe('challenge "usernameXss"', () => {
+  const testUsernameXSS = () => {
     it('Username field should be susceptible to XSS attacks after disarming CSP via profile image URL', () => {
       cy.task('isDocker').then((isDocker) => {
         if (!isDocker) {
@@ -44,9 +44,9 @@ describe('/profile', () => {
         }
       })
     })
-  })
+  }
 
-  describe('challenge "ssti"', () => {
+  const testSSTI = () => {
     it('should be possible to inject arbitrary nodeJs commands in username', () => {
       cy.task('isDocker').then((isDocker) => {
         if (!isDocker) {
@@ -60,20 +60,15 @@ describe('/profile', () => {
             '/solve/challenges/server-side?key=tRy_H4rd3r_n0thIng_iS_Imp0ssibl3'
           )
           cy.visit('/')
-          // void browser.driver.sleep(10000);
-          // void browser.waitForAngularEnabled(true);
           cy.expectChallengeSolved({ challenge: 'SSTi' })
         }
       })
     })
-  })
+  }
 
-  describe('challenge "csrf"', () => {
-    // FIXME Only works on Chrome <80 but Protractor uses latest Chrome version. Test can probably never be turned on again.
+  const testCSRF = () => {
     xit('should be possible to perform a CSRF attack against the user profile page', () => {
       cy.visit('http://htmledit.squarefree.com')
-      /* The script executed below is equivalent to pasting this string into http://htmledit.squarefree.com: */
-      /* <form action="http://localhost:3000/profile" method="POST"><input type="hidden" name="username" value="CSRF"/><input type="submit"/></form><script>document.forms[0].submit();</script> */
       let document: any
       cy.window().then(() => {
         document
@@ -89,7 +84,6 @@ describe('/profile', () => {
         </script>
         `
       })
-      // cy.expectChallengeSolved({ challenge: 'CSRF' })
     })
 
     xit('should be possible to fake a CSRF attack against the user profile page', () => {
@@ -104,8 +98,8 @@ describe('/profile', () => {
           headers: {
             'Content-type': 'application/x-www-form-urlencoded',
             Authorization: `Bearer ${localStorage.getItem('token')}`,
-            Origin: 'http://htmledit.squarefree.com', // FIXME Not allowed by browser due to "unsafe header not permitted"
-            Cookie: `token=${localStorage.getItem('token')}` // FIXME Not allowed by browser due to "unsafe header not permitted"
+            Origin: 'http://htmledit.squarefree.com',
+            Cookie: `token=${localStorage.getItem('token')}`
           },
           body: formData
         })
@@ -113,7 +107,11 @@ describe('/profile', () => {
           console.log('Success')
         }
       })
-      // cy.expectChallengeSolved({ challenge: 'CSRF' })
     })
-  })
+  }
+
+  describe('challenge "ssrf"', testSSRF)
+  describe('challenge "usernameXss"', testUsernameXSS)
+  describe('challenge "ssti"', testSSTI)
+  describe('challenge "csrf"', testCSRF)
 })
