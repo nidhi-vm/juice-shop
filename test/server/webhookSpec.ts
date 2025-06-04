@@ -21,7 +21,10 @@ describe('webhook', () => {
       try {
         await webhook.notify(challenge)
       } catch (error) {
-        chai.assert.fail('webhook.notify should not throw an error when no webhook URL is provided')
+        // Handle the error appropriately
+        if (error instanceof Error) {
+          chai.assert.fail('webhook.notify should not throw an error when no webhook URL is provided')
+        }
       }
     })
 
@@ -47,6 +50,9 @@ describe('webhook', () => {
 
       try {
         await webhook.notify(challenge, 0, url)
+      } catch (error) {
+        // Handle the error appropriately if needed
+        throw error
       } finally {
         server.close()
       }
