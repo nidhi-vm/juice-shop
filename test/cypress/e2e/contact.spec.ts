@@ -14,7 +14,7 @@ describe('/#/contact', () => {
     })
 
     it('should be possible to provide feedback as another user', () => {
-      cy.get('#userId').then(function ($element) {
+      cy.get('#userId').then(($element) => {
         $element[0].removeAttribute('hidden')
         $element[0].removeAttribute('class')
       })
@@ -22,19 +22,19 @@ describe('/#/contact', () => {
       cy.get('#userId').clear().type('2')
       cy.get('#rating').type('{rightarrow}{rightarrow}{rightarrow}')
       cy.get('#comment').type('Picard stinks!')
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
 
       cy.visit('/#/administration')
 
       cy.get(
         '.customer-table > .mat-mdc-table > :nth-child(8) > .cdk-column-user'
       ).then(($val) => {
-        if ($val.text() !== ' 2') {
+        if ($val.text().trim() !== '2') {
           cy.get(
             '.customer-table > .mat-mdc-table > :nth-child(9) > .cdk-column-user'
           ).should('contain.text', '2')
         } else {
-          expect($val.text()).contain('2')
+          expect($val.text()).to.contain('2')
         }
       })
 
@@ -49,8 +49,6 @@ describe('/#/contact', () => {
       solveNextCaptcha()
     })
 
-    // Cypress alert bug
-    // The challenge also passes but its just that cypress freezes and is unable to perform any action
     xit('should be possible to trick the sanitization with a masked XSS attack', () => {
       cy.task('isDocker').then((isDocker) => {
         if (!isDocker) {
@@ -58,7 +56,7 @@ describe('/#/contact', () => {
           cy.get('#comment').type(
             '<<script>Foo</script>iframe src="javascript:alert(`xss`)">'
           )
-          cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+          cy.get('#submitButton').click({ force: true })
 
           cy.visit('/#/about')
           cy.on('window:alert', (t) => {
@@ -81,7 +79,7 @@ describe('/#/contact', () => {
       cy.get('#comment').type('sanitize-html 1.4.2 is non-recursive.')
       cy.get('#comment').type('express-jwt 0.1.3 has broken crypto.')
 
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
       cy.expectChallengeSolved({ challenge: 'Vulnerable Library' })
     })
   })
@@ -92,7 +90,7 @@ describe('/#/contact', () => {
       cy.get('#comment').type(
         'The following libraries are bad for crypto: z85, base85, md5 and hashids'
       )
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
       cy.expectChallengeSolved({ challenge: 'Weird Crypto' })
     })
   })
@@ -103,7 +101,7 @@ describe('/#/contact', () => {
       cy.get('#comment').type(
         'You are a typosquatting victim of this NPM package: epilogue-js'
       )
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
       cy.expectChallengeSolved({ challenge: 'Legacy Typosquatting' })
     })
   })
@@ -114,7 +112,7 @@ describe('/#/contact', () => {
       cy.get('#comment').type(
         'You are a typosquatting victim of this NPM package: ngy-cookie'
       )
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
       cy.expectChallengeSolved({ challenge: 'Frontend Typosquatting' })
     })
   })
@@ -125,7 +123,7 @@ describe('/#/contact', () => {
       cy.get('#comment').type(
         'Pickle Rick is hiding behind one of the support team ladies'
       )
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
       cy.expectChallengeSolved({ challenge: 'Steganography' })
     })
   })
@@ -150,31 +148,6 @@ describe('/#/contact', () => {
 
           await sendPostRequest(responseJson)
         }
-
-        async function sendPostRequest (captcha: {
-          captchaId: number
-          answer: string
-        }) {
-          const response = await fetch(
-            `${Cypress.config('baseUrl')}/api/Feedbacks`,
-            {
-              method: 'POST',
-              cache: 'no-cache',
-              headers: {
-                'Content-type': 'application/json'
-              },
-              body: JSON.stringify({
-                captchaId: captcha.captchaId,
-                captcha: `${captcha.answer}`,
-                comment: 'Comment',
-                rating: 0
-              })
-            }
-          )
-          if (response.status === 201) {
-            console.log('Success')
-          }
-        }
       })
       cy.expectChallengeSolved({ challenge: 'Zero Stars' })
     })
@@ -195,27 +168,7 @@ describe('/#/contact', () => {
           )
           if (response.status === 200) {
             const responseJson = await response.json()
-
-            await sendPostRequest(responseJson)
-          }
-
-          async function sendPostRequest (captcha: {
-            captchaId: number
-            answer: string
-          }) {
-            await fetch(`${Cypress.config('baseUrl')}/api/Feedbacks`, {
-              method: 'POST',
-              cache: 'no-cache',
-              headers: {
-                'Content-type': 'application/json'
-              },
-              body: JSON.stringify({
-                captchaId: captcha.captchaId,
-                captcha: `${captcha.answer}`,
-                comment: `Spam #${i}`,
-                rating: 3
-              })
-            })
+            await sendPostRequest(responseJson, i)
           }
         }
       })
@@ -229,7 +182,7 @@ describe('/#/contact', () => {
       cy.get('#comment').type(
         'Turn on 2FA! Now!!! https://github.com/eslint/eslint-scope/issues/39'
       )
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
       cy.expectChallengeSolved({ challenge: 'Supply Chain Attack' })
     })
   })
@@ -237,25 +190,46 @@ describe('/#/contact', () => {
   describe('challenge "dlpPastebinDataLeak"', () => {
     it('should be possible to post dangerous ingredients of unsafe product as feedback', () => {
       cy.get('#rating').type('{rightarrow}{rightarrow}{rightarrow}')
-      cy.task<ProductConfig>('GetPastebinLeakProduct').then((pastebinLeakProduct: ProductConfig) => {
+      cy.task<ProductConfig>('GetPastebinLeakProduct').then((pastebinLeakProduct) => {
         cy.get('#comment').type(
           pastebinLeakProduct.keywordsForPastebinDataLeakChallenge ? pastebinLeakProduct.keywordsForPastebinDataLeakChallenge.toString() : '?'
         )
       })
-      cy.get('#submitButton').click({ force: true }) // FIXME Analyze Cypress recordings to properly fix behavior during test
+      cy.get('#submitButton').click({ force: true })
       cy.expectChallengeSolved({ challenge: 'Leaked Unsafe Product' })
     })
   })
 })
 
-function solveNextCaptcha () {
+function solveNextCaptcha() {
   cy.get('#captcha')
     .should('be.visible')
     .invoke('text')
     .then((val) => {
       cy.get('#captchaControl').clear()
-      // eslint-disable-next-line no-eval
       const answer = eval(val).toString()
       cy.get('#captchaControl').type(answer)
     })
+}
+
+async function sendPostRequest(captcha: { captchaId: number; answer: string }, index?: number) {
+  const response = await fetch(
+    `${Cypress.config('baseUrl')}/api/Feedbacks`,
+    {
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        captchaId: captcha.captchaId,
+        captcha: `${captcha.answer}`,
+        comment: index !== undefined ? `Spam #${index}` : 'Comment',
+        rating: index !== undefined ? 3 : 0
+      })
+    }
+  )
+  if (response.status === 201) {
+    console.log('Success')
+  }
 }
