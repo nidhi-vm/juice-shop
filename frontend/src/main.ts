@@ -6,7 +6,7 @@
 import { enableProdMode, importProvidersFrom } from '@angular/core'
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
 
-import { AppModule, HttpLoaderFactory } from './app/app.module'
+import { HttpLoaderFactory } from './app/app.module'
 import { environment } from './environments/environment'
 import { AppComponent } from './app/app.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -47,8 +47,6 @@ import { NgxTextDiffModule } from '@winarg/ngx-text-diff';
 import { GalleryModule } from 'ng-gallery';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { Routing } from './app/app.routing';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
