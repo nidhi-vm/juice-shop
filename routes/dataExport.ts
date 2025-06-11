@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
- * SPDX-License-Identifier: MIT
- */
-
 import { type Request, type Response, type NextFunction } from 'express'
 
 import * as challengeUtils from '../lib/challengeUtils'
@@ -12,104 +7,80 @@ import { challenges } from '../data/datacache'
 import * as security from '../lib/insecurity'
 import * as db from '../data/mongodb'
 
-export function dataExport () {
+export function dataExport() {
   return async (req: Request, res: Response, next: NextFunction) => {
     const loggedInUser = security.authenticatedUsers.get(req.headers?.authorization?.replace('Bearer ', ''))
     if (loggedInUser?.data?.email && loggedInUser.data.id) {
       const username = loggedInUser.data.username
       const email = loggedInUser.data.email
       const updatedEmail = email.replace(/[aeiou]/gi, '*')
-      const userData:
-      {
-        username?: string
-        email: string
-        orders: Array<{
-          orderId: string
-          totalPrice: number
-          products: ProductModel[]
-          bonus: number
-          eta: string
-        }>
-        reviews: Array<{
-          message: string
-          author: string
-          productId: number
-          likesCount: number
-          likedBy: string
-        }>
-        memories: Array<{
-          imageUrl: string
-          caption: string
-        }>
-      } =
-      {
-        username,
-        email,
-        orders: [],
-        reviews: [],
-        memories: []
-      }
+      const userData = initializeUserData(username, email)
 
-      const memories = await MemoryModel.findAll({ where: { UserId: req.body.UserId } })
-      memories.forEach((memory: MemoryModel) => {
-        userData.memories.push({
-          imageUrl: req.protocol + '://' + req.get('host') + '/' + memory.imagePath,
-          caption: memory.caption
-        })
-      })
+      try {
+        await populateMemories(req, userData)
+        await populateOrders(updatedEmail, userData)
+        await populateReviews(email, userData)
 
-      db.ordersCollection.find({ email: updatedEmail }).then((orders: Array<{
-        orderId: string
-        totalPrice: number
-        products: ProductModel[]
-        bonus: number
-        eta: string
-      }>) => {
-        if (orders.length > 0) {
-          orders.forEach(order => {
-            userData.orders.push({
-              orderId: order.orderId,
-              totalPrice: order.totalPrice,
-              products: [...order.products],
-              bonus: order.bonus,
-              eta: order.eta
-            })
-          })
+        const emailHash = security.hash(email).slice(0, 4)
+        for (const order of userData.orders) {
+          challengeUtils.solveIf(challenges.dataExportChallenge, () => { return order.orderId.split('-')[0] !== emailHash })
         }
-
-        db.reviewsCollection.find({ author: email }).then((reviews: Array<{
-          message: string
-          author: string
-          product: number
-          likesCount: number
-          likedBy: string
-        }>) => {
-          if (reviews.length > 0) {
-            reviews.forEach(review => {
-              userData.reviews.push({
-                message: review.message,
-                author: review.author,
-                productId: review.product,
-                likesCount: review.likesCount,
-                likedBy: review.likedBy
-              })
-            })
-          }
-          const emailHash = security.hash(email).slice(0, 4)
-          for (const order of userData.orders) {
-            challengeUtils.solveIf(challenges.dataExportChallenge, () => { return order.orderId.split('-')[0] !== emailHash })
-          }
-          res.status(200).send({ userData: JSON.stringify(userData, null, 2), confirmation: 'Your data export will open in a new Browser window.' })
-        },
-        () => {
-          next(new Error(`Error retrieving reviews for ${updatedEmail}`))
-        })
-      },
-      () => {
-        next(new Error(`Error retrieving orders for ${updatedEmail}`))
-      })
+        res.status(200).send({ userData: JSON.stringify(userData, null, 2), confirmation: 'Your data export will open in a new Browser window.' })
+      } catch (error) {
+        next(error)
+      }
     } else {
       next(new Error('Blocked illegal activity by ' + req.socket.remoteAddress))
     }
+  }
+}
+
+function initializeUserData(username: string, email: string) {
+  return {
+    username,
+    email,
+    orders: [],
+    reviews: [],
+    memories: []
+  }
+}
+
+async function populateMemories(req: Request, userData: any) {
+  const memories = await MemoryModel.findAll({ where: { UserId: req.body.UserId } })
+  memories.forEach((memory: MemoryModel) => {
+    userData.memories.push({
+      imageUrl: req.protocol + '://' + req.get('host') + '/' + memory.imagePath,
+      caption: memory.caption
+    })
+  })
+}
+
+async function populateOrders(updatedEmail: string, userData: any) {
+  const orders = await db.ordersCollection.find({ email: updatedEmail })
+  if (orders.length > 0) {
+    orders.forEach(order => {
+      userData.orders.push({
+        orderId: order.orderId,
+        totalPrice: order.totalPrice,
+        products: [...order.products],
+        bonus: order.bonus,
+        eta: order.eta
+      })
+    })
+  }
+}
+
+async function populateReviews(email: string, userData: any) {
+  const reviews = await db.reviewsCollection.find({ author: email })
+  if (reviews.length > 0) {
+    reviews.forEach(review => {
+      userData.reviews.push({
+        message: review.message,
+        author: review.author,
+        productId: review.product,
+        likesCount: review.likesCount,
+        likedBy: review.likedBy
+      })
+    })
   }
 }
