@@ -1,8 +1,3 @@
-<!--
-  ~ Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
-  ~ SPDX-License-Identifier: MIT
-  -->
-
 <mat-card appearance="outlined" class="mat-elevation-z6 mat-own-card">
   <div class="mdc-card">
     <h1 translate>TITLE_ADMINISTRATION</h1>
@@ -14,7 +9,7 @@
         <mat-table [dataSource]="userDataSource">
           <ng-container matColumnDef="user">
             <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell *matCellDef="let user" style="vertical-align: middle">
+            <mat-cell *matCellDef="let user" style="vertical-align: middle" (keydown)="onKeyPress($event)" (keyup)="onKeyUp($event)" (keydown)="onKeyDown($event)">
               <i *ngIf="doesUserHaveAnActiveSession(user)" class="fas fa-user fa-lg confirmation"></i>
             </mat-cell>
           </ng-container>
@@ -112,4 +107,4 @@
   <mat-row *matRowDef="let row; columns: userColumns; "></mat-row>
 </mat-table>
 
-<img src="assets/public/images/padding/19px.png"/>
+<img src="assets/public/images/padding/19px.png" alt="Padding Image"/>
