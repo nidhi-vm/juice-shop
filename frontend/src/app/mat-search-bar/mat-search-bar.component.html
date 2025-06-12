@@ -4,12 +4,11 @@
         autocapitalize="none" />
 </mat-form-field>
 
-
 <span class="mat-search_icons" [class.mat-search_icons--active]="searchVisible">
-    <mat-icon class="mat-search_icon-close" (click)="close()" matRipple>
+    <mat-icon class="mat-search_icon-close" (click)="close()" matRipple (keydown)="close()">
         close
     </mat-icon>
-    <mat-icon class="mat-search_icon-search" (click)="open()" matRipple>
+    <mat-icon class="mat-search_icon-search" (click)="open()" matRipple (keydown)="open()">
         search
     </mat-icon>
 </span>
