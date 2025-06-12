@@ -21,7 +21,7 @@ import { MatIconModule } from '@angular/material/icon'
 @Component({
   selector: 'app-data-export',
   templateUrl: './data-export.component.html',
-  styleUrls: ['./data-export.component.scss'],
+  styleUrls: ['./data-export.component.scss',
   imports: [FlexModule, MatCardModule, TranslateModule, NgIf, MatRadioGroup, FormsModule, ReactiveFormsModule, MatLabel, MatRadioButton, MatFormFieldModule, MatInputModule, MatHint, MatError, MatButtonModule, MatIconModule]
 })
 export class DataExportComponent implements OnInit {
