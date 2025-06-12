@@ -6,7 +6,6 @@
 import colors from 'colors/safe'
 import * as utils from '../utils'
 import logger from '../logger'
-// @ts-expect-error FIXME due to non-existing type definitions for check-dependencies
 import dependencyChecker from 'check-dependencies'
 
 const validateDependencies = async ({ packageDir = '.', exitOnFailure = true } = {}) => {
