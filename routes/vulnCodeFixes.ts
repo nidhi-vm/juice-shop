@@ -8,12 +8,12 @@ import { type ChallengeKey } from 'models/challenge'
 
 const FixesDir = 'data/static/codefixes'
 
-interface codeFix {
+interface CodeFix {
   fixes: string[]
   correct: number
 }
 
-type cache = Record<string, codeFix>
+type cache = Record<string, CodeFix>
 
 const CodeFixes: cache = {}
 
