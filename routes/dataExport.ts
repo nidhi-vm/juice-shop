@@ -6,7 +6,6 @@
 import { type Request, type Response, type NextFunction } from 'express'
 
 import * as challengeUtils from '../lib/challengeUtils'
-import { type ProductModel } from '../models/product'
 import { MemoryModel } from '../models/memory'
 import { challenges } from '../data/datacache'
 import * as security from '../lib/insecurity'
@@ -26,7 +25,7 @@ export function dataExport () {
         orders: Array<{
           orderId: string
           totalPrice: number
-          products: ProductModel[]
+          products: Array<unknown>
           bonus: number
           eta: string
         }>
@@ -61,7 +60,7 @@ export function dataExport () {
       db.ordersCollection.find({ email: updatedEmail }).then((orders: Array<{
         orderId: string
         totalPrice: number
-        products: ProductModel[]
+        products: Array<unknown>
         bonus: number
         eta: string
       }>) => {
