@@ -67,14 +67,13 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     private readonly router: Router, private readonly route: ActivatedRoute, private readonly sanitizer: DomSanitizer, private readonly ngZone: NgZone, private readonly io: SocketIoService,
     private readonly snackBarHelperService: SnackBarHelperService, private readonly cdRef: ChangeDetectorRef) { }
 
-  // vuln-code-snippet start restfulXssChallenge
   ngAfterViewInit () {
     const products = this.productService.search('')
     const quantities = this.quantityService.getAll()
     forkJoin([quantities, products]).subscribe(([quantities, products]) => {
       const dataTable: TableEntry[] = []
       this.tableData = products
-      this.trustProductDescription(products) // vuln-code-snippet neutral-line restfulXssChallenge
+      this.trustProductDescription(products)
       for (const product of products) {
         dataTable.push({
           name: product.name,
@@ -86,13 +85,10 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
         })
       }
       for (const quantity of quantities) {
-        const entry = dataTable.find((dataTableEntry) => {
-          return dataTableEntry.id === quantity.ProductId
-        })
-        if (entry === undefined) {
-          continue
+        const entry = dataTable.find((dataTableEntry) => dataTableEntry.id === quantity.ProductId)
+        if (entry !== undefined) {
+          entry.quantity = quantity.quantity
         }
-        entry.quantity = quantity.quantity
       }
       this.dataSource = new MatTableDataSource<TableEntry>(dataTable)
       for (let i = 1; i <= Math.ceil(this.dataSource.data.length / 12); i++) {
@@ -106,10 +102,10 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
       this.routerSubscription = this.router.events.subscribe(() => {
         this.filterTable()
       })
-      const challenge: string = this.route.snapshot.queryParams.challenge // vuln-code-snippet hide-start
+      const challenge: string = this.route.snapshot.queryParams.challenge
       if (challenge && this.route.snapshot.url.join('').match(/hacking-instructor/)) {
         this.startHackingInstructor(decodeURIComponent(challenge))
-      } // vuln-code-snippet hide-end
+      }
       if (window.innerWidth < 2600) {
         this.breakpoint = 4
         if (window.innerWidth < 1740) {
@@ -128,12 +124,11 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     }, (err) => { console.log(err) })
   }
 
-  trustProductDescription (tableData: any[]) { // vuln-code-snippet neutral-line restfulXssChallenge
-    for (let i = 0; i < tableData.length; i++) { // vuln-code-snippet neutral-line restfulXssChallenge
-      tableData[i].description = this.sanitizer.bypassSecurityTrustHtml(tableData[i].description) // vuln-code-snippet vuln-line restfulXssChallenge
-    } // vuln-code-snippet neutral-line restfulXssChallenge
-  } // vuln-code-snippet neutral-line restfulXssChallenge
-  // vuln-code-snippet end restfulXssChallenge
+  trustProductDescription (tableData: any[]) {
+    for (const product of tableData) {
+      product.description = this.sanitizer.bypassSecurityTrustHtml(product.description)
+    }
+  }
 
   ngOnDestroy () {
     if (this.routerSubscription) {
@@ -147,22 +142,17 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  // vuln-code-snippet start localXssChallenge xssBonusChallenge
   filterTable () {
     let queryParam: string = this.route.snapshot.queryParams.q
     if (queryParam) {
       queryParam = queryParam.trim()
-      this.ngZone.runOutsideAngular(() => { // vuln-code-snippet hide-start
+      this.ngZone.runOutsideAngular(() => {
         this.io.socket().emit('verifyLocalXssChallenge', queryParam)
-      }) // vuln-code-snippet hide-end
+      })
       this.dataSource.filter = queryParam.toLowerCase()
-      this.searchValue = this.sanitizer.bypassSecurityTrustHtml(queryParam) // vuln-code-snippet vuln-line localXssChallenge xssBonusChallenge
+      this.searchValue = this.sanitizer.bypassSecurityTrustHtml(queryParam)
       this.gridDataSource.subscribe((result: any) => {
-        if (result.length === 0) {
-          this.emptyState = true
-        } else {
-          this.emptyState = false
-        }
+        this.emptyState = result.length === 0
       })
     } else {
       this.dataSource.filter = ''
@@ -170,7 +160,6 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
       this.emptyState = false
     }
   }
-  // vuln-code-snippet end localXssChallenge xssBonusChallenge
 
   startHackingInstructor (challengeName: string) {
     console.log(`Starting instructions for challenge "${challengeName}"`)
@@ -193,11 +182,10 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     this.basketService.find(Number(sessionStorage.getItem('bid'))).subscribe((basket) => {
       const productsInBasket: any = basket.Products
       let found = false
-      for (let i = 0; i < productsInBasket.length; i++) {
-        if (productsInBasket[i].id === id) {
+      for (const productInBasket of productsInBasket) {
+        if (productInBasket.id === id) {
           found = true
-          this.basketService.get(productsInBasket[i].BasketItem.id).subscribe((existingBasketItem) => {
-            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+          this.basketService.get(productInBasket.BasketItem.id).subscribe((existingBasketItem) => {
             const newQuantity = existingBasketItem.quantity + 1
             this.basketService.put(existingBasketItem.id, { quantity: newQuantity }).subscribe((updatedBasketItem) => {
               this.productService.get(updatedBasketItem.ProductId).subscribe((product) => {
