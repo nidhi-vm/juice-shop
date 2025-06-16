@@ -43,7 +43,7 @@ describe('/chatbot', () => {
           cy.get('#message-input').type('...').type('{enter}')
 
           const genArr = Array.from({ length: 100 }, (v, k) => k + 1)
-          cy.wrap(genArr).eachSeries(() => {
+          cy.wrap(genArr).eachSeries((num) => {
             cy.get('#message-input')
               .type(couponIntent.utterances[0])
               .type('{enter}')
