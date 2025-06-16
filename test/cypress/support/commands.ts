@@ -33,7 +33,7 @@ Cypress.Commands.add(
   'login',
   (context: { email: string, password: string, totpSecret?: string }) => {
     cy.visit('/#/login')
-    if (context.email.match(/\S+@\S+\.\S+/) != null) {
+    if (RegExp(/\S+@\S+\.\S+/).exec(context.email) != null) {
       cy.get('#email').type(context.email)
     } else {
       cy.task<string>('GetFromConfig', 'application.domain').then(
