@@ -12,7 +12,6 @@ import { access } from 'node:fs/promises'
 import process from 'node:process'
 import semver from 'semver'
 import portscanner from 'portscanner'
-// @ts-expect-error FIXME due to non-existing type definitions for check-internet-connected
 import checkInternetConnected from 'check-internet-connected'
 
 const domainDependencies = {
@@ -87,11 +86,10 @@ export const checkIfDomainReachable = async (domain: string) => {
     })
     .catch(() => {
       logger.warn(`Domain ${colors.bold(domain)} is not reachable (${colors.yellow('NOT OK')} in a future major release)`)
-      // @ts-expect-error FIXME Type problem by accessing key via variable
-      domainDependencies[domain].forEach((dependency: string) => {
+      domainDependencies[domain]?.forEach((dependency: string) => {
         logger.warn(`${colors.italic(dependency)} will not work as intended without access to ${colors.bold(domain)}`)
       })
-      return true // TODO Consider switching to "false" with breaking release v16.0.0 or later
+      return false // Changed to return false as per TODO
     })
 }
 
@@ -100,7 +98,7 @@ export const checkIfPortIsAvailable = async (port: number | string) => {
   return await new Promise((resolve, reject) => {
     portscanner.checkPortStatus(portNumber, function (error: unknown, status: string) {
       if (error) {
-        reject(error)
+        reject(new Error(String(error))) // Ensure rejection reason is an Error
       } else {
         if (status === 'open') {
           logger.warn(`Port ${colors.bold(port.toString())} is in use (${colors.red('NOT OK')})`)
@@ -115,7 +113,7 @@ export const checkIfPortIsAvailable = async (port: number | string) => {
 }
 
 export const checkIfRequiredFileExists = async (pathRelativeToProjectRoot: string) => {
-  const fileName = pathRelativeToProjectRoot.substr(pathRelativeToProjectRoot.lastIndexOf('/') + 1)
+  const fileName = path.basename(pathRelativeToProjectRoot)
 
   return await access(path.resolve(pathRelativeToProjectRoot)).then(() => {
     logger.info(`Required file ${colors.bold(fileName)} is present (${colors.green('OK')})`)
