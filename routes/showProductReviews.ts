@@ -13,7 +13,6 @@ import * as db from '../data/mongodb'
 import * as utils from '../lib/utils'
 
 // Blocking sleep function as in native MongoDB
-// @ts-expect-error FIXME Type safety broken for global object
 global.sleep = (time: number) => {
   // Ensure that users don't accidentally dos their servers for too long
   if (time > 2000) {
@@ -37,9 +36,9 @@ export function showProductReviews () {
       const t1 = new Date().getTime()
       challengeUtils.solveIf(challenges.noSqlCommandChallenge, () => { return (t1 - t0) > 2000 })
       const user = security.authenticatedUsers.from(req)
-      for (let i = 0; i < reviews.length; i++) {
-        if (user === undefined || reviews[i].likedBy.includes(user.data.email)) {
-          reviews[i].liked = true
+      for (const review of reviews) {
+        if (user === undefined || review.likedBy.includes(user.data.email)) {
+          review.liked = true
         }
       }
       res.json(utils.queryResultToJson(reviews))
