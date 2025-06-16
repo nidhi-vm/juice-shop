@@ -21,7 +21,7 @@
             <div class="mdc-card">
               <div><b >{{"PAYMENT_METHOD" | translate}}</b></div>
               <div><span >{{"CARD_ENDING_IN" | translate}}</span> {{paymentMethod?.cardNum}}</div>
-              <div><span >{{"CARD_HOLDER" | translate}}"</span> {{paymentMethod?.fullName}}</div>
+              <div><span >{{"CARD_HOLDER" | translate}}</span> {{paymentMethod?.fullName}}</div>
             </div>
           </mat-card>
   
@@ -45,24 +45,24 @@
           <div class="mdc-card">
             <div class="order-summary" >{{"ORDER_SUMMARY" | translate}}</div>
             <table class="mat-table">
-              <tr class="mat-row">
-                <td class="mat-cell label" >{{"ITEMS" | translate}}</td>
-                <td class="mat-cell price">{{ itemTotal?.toFixed(2) }}&curren;</td>
-              </tr>
-              <tr class="mat-row">
-                <td class="mat-cell label" >{{"DELIVERY" | translate}}</td>
-                <td class="mat-cell price">{{ deliveryPrice.toFixed(2) }}&curren;</td>
-              </tr>
-              <tr class="mat-row">
-                <td class="mat-cell label" >{{"PROMOTION" | translate}}</td>
-                <td class="mat-cell price">{{ promotionalDiscount.toFixed(2) }}&curren;</td>
-              </tr>
-              <tr class="mat-row">
-                <td class="mat-footer-cell label" >{{"LABEL_TOTAL_PRICE" | translate}}</td>
-              <td class="mat-footer-cell price">{{ (itemTotal + deliveryPrice - promotionalDiscount)?.toFixed(2)
-                }}&curren;
-              </td>
-              </tr>
+              <thead>
+                <tr>
+                  <th>{{"ITEMS" | translate}}</th>
+                  <th>{{"PRICE" | translate}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="mat-row" *ngFor="let product of products">
+                  <td class="mat-cell label">{{ product.name }}</td>
+                  <td class="mat-cell price">{{ product.price | currency }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="mat-footer-row">
+                  <td class="mat-footer-cell label">{{"LABEL_TOTAL_PRICE" | translate}}</td>
+                  <td class="mat-footer-cell price">{{ (itemTotal + deliveryPrice - promotionalDiscount)?.toFixed(2) }}&curren;</td>
+                </tr>
+              </tfoot>
             </table>
             <!-- Checkout Button -->
             <button mat-raised-button mat-button class="btn btn-pay" color="primary" aria-label="Complete your purchase"
@@ -80,4 +80,3 @@
 
     </div>
   </mat-card>
-  
