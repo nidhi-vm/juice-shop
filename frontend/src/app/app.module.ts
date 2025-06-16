@@ -1,20 +1,4 @@
-/*
- * Copyright (c) 2014-2025 Bjoern Kimminich & the OWASP Juice Shop contributors.
- * SPDX-License-Identifier: MIT
- */
-
-import { NgModule } from '@angular/core'
-import { type HttpClient } from '@angular/common/http'
-import { OverlayContainer } from '@angular/cdk/overlay'
-import { TranslateHttpLoader } from '@ngx-translate/http-loader'
-import { ConfigurationService } from './Services/configuration.service'
-
-export function HttpLoaderFactory (http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json')
-}
-
-@NgModule(/* TODO(standalone-migration): clean up removed NgModule class manually.
-{
+@NgModule({
     declarations: [AppComponent],
     imports: [
     BrowserModule,
@@ -72,7 +56,6 @@ export function HttpLoaderFactory (http: HttpClient) {
     MatAutocompleteModule,
     HighlightModule,
     AboutComponent,
-    AdministrationComponent,
     BasketComponent,
     LoginComponent,
     NavbarComponent,
@@ -107,7 +90,6 @@ export function HttpLoaderFactory (http: HttpClient) {
     OrderCompletionComponent,
     AddressCreateComponent,
     AddressSelectComponent,
-    AddressComponent,
     SavedAddressComponent,
     PaymentComponent,
     PaymentMethodComponent,
@@ -115,7 +97,6 @@ export function HttpLoaderFactory (http: HttpClient) {
     AccountingComponent,
     OrderSummaryComponent,
     PurchaseBasketComponent,
-    PrivacyPolicyComponent,
     ChallengeStatusBadgeComponent,
     WalletComponent,
     OrderHistoryComponent,
@@ -180,7 +161,7 @@ export function HttpLoaderFactory (http: HttpClient) {
         PhotoWallService
     ],
     bootstrap: [AppComponent]
-} */)
+} )
 export class AppModule {
   constructor (public configurationService: ConfigurationService, public overlayContainer: OverlayContainer) {
     configurationService.getApplicationConfiguration().subscribe((conf) => {
