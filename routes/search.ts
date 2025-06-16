@@ -28,8 +28,8 @@ export function searchProducts () {
           UserModel.findAll().then(data => {
             const users = utils.queryResultToJson(data)
             if (users.data?.length) {
-              for (let i = 0; i < users.data.length; i++) {
-                solved = solved && utils.containsOrEscaped(dataString, users.data[i].email) && utils.contains(dataString, users.data[i].password)
+              for (const user of users.data) {
+                solved = solved && utils.containsOrEscaped(dataString, user.email) && utils.contains(dataString, user.password)
                 if (!solved) {
                   break
                 }
@@ -44,12 +44,12 @@ export function searchProducts () {
         }
         if (challengeUtils.notSolved(challenges.dbSchemaChallenge)) {
           let solved = true
-          void models.sequelize.query('SELECT sql FROM sqlite_master').then(([data]: any) => {
+          models.sequelize.query('SELECT sql FROM sqlite_master').then(([data]: any) => {
             const tableDefinitions = utils.queryResultToJson(data)
             if (tableDefinitions.data?.length) {
-              for (let i = 0; i < tableDefinitions.data.length; i++) {
-                if (tableDefinitions.data[i].sql) {
-                  solved = solved && utils.containsOrEscaped(dataString, tableDefinitions.data[i].sql)
+              for (const definition of tableDefinitions.data) {
+                if (definition.sql) {
+                  solved = solved && utils.containsOrEscaped(dataString, definition.sql)
                   if (!solved) {
                     break
                   }
@@ -61,9 +61,9 @@ export function searchProducts () {
             }
           })
         } // vuln-code-snippet hide-end
-        for (let i = 0; i < products.length; i++) {
-          products[i].name = req.__(products[i].name)
-          products[i].description = req.__(products[i].description)
+        for (const product of products) {
+          product.name = req.__(product.name)
+          product.description = req.__(product.description)
         }
         res.json(utils.queryResultToJson(products))
       }).catch((error: ErrorWithParent) => {
