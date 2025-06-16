@@ -4,54 +4,54 @@
  */
 
 import { enableProdMode, importProvidersFrom } from '@angular/core'
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
-
-import { AppModule, HttpLoaderFactory } from './app/app.module'
-import { environment } from './environments/environment'
+import { BrowserModule, bootstrapApplication } from '@angular/platform-browser'
 import { AppComponent } from './app/app.component';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { LayoutModule } from '@angular/cdk/layout';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatInputModule } from '@angular/material/input';
-import { MatCardModule } from '@angular/material/card';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatTableModule } from '@angular/material/table';
-import { MatRippleModule, MatNativeDateModule } from '@angular/material/core';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { ClipboardModule } from 'ngx-clipboard';
-import { FileUploadModule } from 'ng2-file-upload';
-import { QrCodeModule } from 'ng-qrcode';
-import { NgxTextDiffModule } from '@winarg/ngx-text-diff';
-import { GalleryModule } from 'ng-gallery';
+import { environment } from './environments/environment'
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { CookieModule, CookieService } from 'ngy-cookie';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { HttpLoaderFactory } from './app/app.module';
 import { Routing } from './app/app.routing';
-import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
+import { GalleryModule } from 'ng-gallery';
+import { NgxTextDiffModule } from '@winarg/ngx-text-diff';
+import { QrCodeModule } from 'ng-qrcode';
+import { FileUploadModule } from 'ng2-file-upload';
+import { ClipboardModule } from 'ngx-clipboard';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatRippleModule } from '@angular/material/core';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { LayoutModule } from '@angular/cdk/layout';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { HIGHLIGHT_OPTIONS, HighlightModule } from 'ngx-highlightjs';
+import { HTTP_INTERCEPTORS, HttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { RequestInterceptor } from './app/Services/request.interceptor';
 import { PhotoWallService } from './app/Services/photo-wall.service';
 import { DeliveryService } from './app/Services/delivery.service';
 import { OrderHistoryService } from './app/Services/order-history.service';
@@ -62,7 +62,6 @@ import { KeysService } from './app/Services/keys.service';
 import { ImageCaptchaService } from './app/Services/image-captcha.service';
 import { PaymentService } from './app/Services/payment.service';
 import { AdminGuard, LoginGuard, AccountingGuard, DeluxeGuard } from './app/app.guard';
-import { CookieService, CookieModule } from 'ngy-cookie';
 import { ChallengeService } from './app/Services/challenge.service';
 import { BasketService } from './app/Services/basket.service';
 import { RecycleService } from './app/Services/recycle.service';
@@ -80,9 +79,6 @@ import { SecurityQuestionService } from './app/Services/security-question.servic
 import { AdministrationService } from './app/Services/administration.service';
 import { ConfigurationService } from './app/Services/configuration.service';
 import { ProductService } from './app/Services/product.service';
-import { HIGHLIGHT_OPTIONS, HighlightModule } from 'ngx-highlightjs';
-import { RequestInterceptor } from './app/Services/request.interceptor';
-import { HTTP_INTERCEPTORS, HttpClient, withInterceptorsFromDi, provideHttpClient } from '@angular/common/http';
 
 if (environment.production) {
   enableProdMode()
@@ -96,7 +92,7 @@ bootstrapApplication(AppComponent, {
                 useFactory: HttpLoaderFactory,
                 deps: [HttpClient]
             }
-        }), CookieModule.forRoot(), FlexLayoutModule, ReactiveFormsModule, GalleryModule, NgxTextDiffModule, QrCodeModule, FileUploadModule, ClipboardModule, MatToolbarModule, MatIconModule, FormsModule, MatFormFieldModule, MatSelectModule, MatButtonModule, MatSidenavModule, MatRippleModule, MatTableModule, MatPaginatorModule, MatCardModule, MatInputModule, MatCheckboxModule, MatDialogModule, MatDividerModule, MatDatepickerModule, MatNativeDateModule, MatExpansionModule, MatProgressBarModule, MatTooltipModule, MatMenuModule, MatListModule, MatButtonToggleModule, LayoutModule, MatGridListModule, MatBadgeModule, MatRadioModule, MatSnackBarModule, MatSliderModule, MatTabsModule, MatSlideToggleModule, MatChipsModule, MatAutocompleteModule, HighlightModule),
+        }), CookieModule.forRoot(), FlexLayoutModule, ReactiveFormsModule, GalleryModule, NgxTextDiffModule, QrCodeModule, FileUploadModule, ClipboardModule, MatToolbarModule, MatIconModule, MatFormFieldModule, MatSelectModule, MatButtonModule, MatSidenavModule, MatRippleModule, MatTableModule, MatPaginatorModule, MatCardModule, MatInputModule, MatCheckboxModule, MatDialogModule, MatDividerModule, MatDatepickerModule, MatNativeDateModule, MatExpansionModule, MatProgressBarModule, MatTooltipModule, MatMenuModule, MatListModule, MatButtonToggleModule, LayoutModule, MatGridListModule, MatBadgeModule, MatRadioModule, MatSnackBarModule, MatSliderModule, MatTabsModule, MatSlideToggleModule, HighlightModule),
         {
             provide: HTTP_INTERCEPTORS,
             useClass: RequestInterceptor,
