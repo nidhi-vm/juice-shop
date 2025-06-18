@@ -71,14 +71,12 @@ describe('TwoFactorAuthEnterComponent', () => {
       MatButtonModule,
       MatGridListModule,
       MatSnackBarModule,
-      MatTooltipModule,
-      TwoFactorAuthEnterComponent, SearchResultComponent],
+      MatTooltipModule],
       providers: [
         { provide: UserService, useValue: userService },
         { provide: TwoFactorAuthService, useValue: twoFactorAuthService },
         CookieService,
         WindowRefService,
-        CookieService,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()
       ]
@@ -118,7 +116,8 @@ describe('TwoFactorAuthEnterComponent', () => {
     expect(sessionStorage.getItem('bid')).toBe('42')
   })
 
-  xit('should notify about user login after 2FA verification', () => { // FIXME Spy call is not registered at all
+  it('should notify about user login after 2FA verification', () => {
+    twoFactorAuthService.verify.and.returnValue(of({}))
     component.verify()
 
     expect(userService.isLoggedIn.next).toHaveBeenCalledWith(true)
