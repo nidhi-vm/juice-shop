@@ -22,12 +22,10 @@ mat-toolbar {
   width: 26px;
 }
 
-mat-toolbar {
-  mat-icon {
-    font-size: 23px;
-    height: 24px;
-    width: 24px;
-  }
+.mat-toolbar-icon {
+  font-size: 23px;
+  height: 24px;
+  width: 24px;
 }
 
 .warn-notification {
