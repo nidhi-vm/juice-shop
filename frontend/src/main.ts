@@ -6,7 +6,6 @@
 import { enableProdMode, importProvidersFrom } from '@angular/core'
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
 
-import { AppModule, HttpLoaderFactory } from './app/app.module'
 import { environment } from './environments/environment'
 import { AppComponent } from './app/app.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -45,10 +44,8 @@ import { FileUploadModule } from 'ng2-file-upload';
 import { QrCodeModule } from 'ng-qrcode';
 import { NgxTextDiffModule } from '@winarg/ngx-text-diff';
 import { GalleryModule } from 'ng-gallery';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { Routing } from './app/app.routing';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
@@ -82,7 +79,7 @@ import { ConfigurationService } from './app/Services/configuration.service';
 import { ProductService } from './app/Services/product.service';
 import { HIGHLIGHT_OPTIONS, HighlightModule } from 'ngx-highlightjs';
 import { RequestInterceptor } from './app/Services/request.interceptor';
-import { HTTP_INTERCEPTORS, HttpClient, withInterceptorsFromDi, provideHttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 if (environment.production) {
   enableProdMode()
@@ -96,7 +93,7 @@ bootstrapApplication(AppComponent, {
                 useFactory: HttpLoaderFactory,
                 deps: [HttpClient]
             }
-        }), CookieModule.forRoot(), FlexLayoutModule, ReactiveFormsModule, GalleryModule, NgxTextDiffModule, QrCodeModule, FileUploadModule, ClipboardModule, MatToolbarModule, MatIconModule, FormsModule, MatFormFieldModule, MatSelectModule, MatButtonModule, MatSidenavModule, MatRippleModule, MatTableModule, MatPaginatorModule, MatCardModule, MatInputModule, MatCheckboxModule, MatDialogModule, MatDividerModule, MatDatepickerModule, MatNativeDateModule, MatExpansionModule, MatProgressBarModule, MatTooltipModule, MatMenuModule, MatListModule, MatButtonToggleModule, LayoutModule, MatGridListModule, MatBadgeModule, MatRadioModule, MatSnackBarModule, MatSliderModule, MatTabsModule, MatSlideToggleModule, MatChipsModule, MatAutocompleteModule, HighlightModule),
+        }), CookieModule.forRoot(), FlexLayoutModule, ReactiveFormsModule, GalleryModule, NgxTextDiffModule, QrCodeModule, FileUploadModule, ClipboardModule, MatToolbarModule, MatIconModule, MatFormFieldModule, MatSelectModule, MatButtonModule, MatSidenavModule, MatRippleModule, MatTableModule, MatPaginatorModule, MatCardModule, MatInputModule, MatCheckboxModule, MatDialogModule, MatDividerModule, MatDatepickerModule, MatNativeDateModule, MatExpansionModule, MatProgressBarModule, MatTooltipModule, MatMenuModule, MatListModule, MatButtonToggleModule, LayoutModule, MatGridListModule, MatBadgeModule, MatRadioModule, MatSnackBarModule, MatSliderModule, MatTabsModule, MatSlideToggleModule, MatChipsModule, MatAutocompleteModule, HighlightModule),
         {
             provide: HTTP_INTERCEPTORS,
             useClass: RequestInterceptor,
@@ -145,8 +142,7 @@ bootstrapApplication(AppComponent, {
         OrderHistoryService,
         DeliveryService,
         PhotoWallService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideAnimations()
+        provideHttpClient(withInterceptorsFromDi())
     ]
 })
   .catch((err: Error) => console.log(err))
