@@ -61,7 +61,8 @@ export function getUserProfile () {
         }
         username = eval(code) // eslint-disable-line no-eval
       } catch (err) {
-        username = '\\' + username
+        next(err) // Handle the exception properly
+        return
       }
     } else {
       username = '\\' + username
@@ -87,7 +88,7 @@ export function getUserProfile () {
     const CSP = `img-src 'self' ${user?.profileImage}; script-src 'self' 'unsafe-eval' https://code.getmdl.io http://ajax.googleapis.com`
 
     challengeUtils.solveIf(challenges.usernameXssChallenge, () => {
-      return username && user?.profileImage.match(/;[ ]*script-src(.)*'unsafe-inline'/g) !== null && utils.contains(username, '<script>alert(`xss`)</script>')
+      return username && user?.profileImage.match(/;script-src(.)*'unsafe-inline'/g) !== null && utils.contains(username, '<script>alert(`xss`)</script>')
     })
 
     res.set({
