@@ -113,7 +113,7 @@ export class NavbarComponent implements OnInit {
       if (config?.application?.logo) {
         let logo: string = config.application.logo
 
-        if (logo.substring(0, 4) === 'http') {
+        if (logo.startsWith('http')) {
           logo = decodeURIComponent(logo.substring(logo.lastIndexOf('/') + 1))
         }
         this.logoSrc = 'assets/public/images/' + logo
