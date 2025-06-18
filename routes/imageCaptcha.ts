@@ -36,7 +36,7 @@ export function imageCaptchas () {
 
 export const verifyImageCaptcha = () => (req: Request, res: Response, next: NextFunction) => {
   const user = security.authenticatedUsers.from(req)
-  const UserId = user ? user.data ? user.data.id : undefined : undefined
+  const UserId = user ? user.data.id : undefined
   ImageCaptchaModel.findAll({
     limit: 1,
     where: {
