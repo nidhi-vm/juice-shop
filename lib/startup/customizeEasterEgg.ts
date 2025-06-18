@@ -5,7 +5,6 @@
 
 import config from 'config'
 import * as utils from '../utils'
-// @ts-expect-error FIXME due to non-existing type definitions for replace
 import replace from 'replace'
 
 const customizeEasterEgg = async () => {
