@@ -49,7 +49,7 @@ export function upgradeToDeluxe () {
         security.authenticatedUsers.put(updatedToken, userWithStatus)
         res.status(200).json({ status: 'success', data: { confirmation: 'Congratulations! You are now a deluxe member!', token: updatedToken } })
       } catch (error) {
-        res.status(400).json({ status: 'error', error: 'Something went wrong. Please try again!' })
+        res.status(500).json({ status: 'error', error: 'An unexpected error occurred. Please try again later.' })
       }
     } catch (err: unknown) {
       res.status(400).json({ status: 'error', error: 'Something went wrong: ' + utils.getErrorMessage(err) })
