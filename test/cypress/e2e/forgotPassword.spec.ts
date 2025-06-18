@@ -9,61 +9,35 @@ describe('/#/forgot-password', () => {
     cy.intercept('GET', '/rest/user/security-question?email=*').as('securityQuestion')
   })
 
+  const resetPasswordAsUser = (email: string, securityAnswer: string, newPassword: string, challenge: string) => {
+    cy.task<string>('GetFromConfig', 'application.domain').then((appDomain: string) => {
+      cy.get('#email').type(`${email}@${appDomain}`)
+    })
+    cy.wait('@securityQuestion')
+    cy.get('#securityAnswer').should('not.be.disabled').focus().type(securityAnswer)
+    cy.get('#newPassword').focus().type(newPassword)
+    cy.get('#newPasswordRepeat').focus().type(newPassword)
+    cy.get('#resetButton').click()
+    cy.get('.confirmation').should('not.be.hidden')
+    cy.expectChallengeSolved({ challenge })
+  }
+
   describe('as Jim', () => {
     it('should be able to reset password with his security answer', () => {
-      cy.task<string>('GetFromConfig', 'application.domain').then(
-        (appDomain: string) => {
-          cy.get('#email').type(`jim@${appDomain}`)
-        }
-      )
-      cy.wait('@securityQuestion')
-      cy.get('#securityAnswer').should('not.be.disabled').focus().type('Samuel')
-      // recordings to properly fix behavior during test
-      cy.get('#newPassword').focus().type('I <3 Spock')
-      cy.get('#newPasswordRepeat').focus().type('I <3 Spock')
-      cy.get('#resetButton').click()
-
-      cy.get('.confirmation').should('not.be.hidden')
-      cy.expectChallengeSolved({ challenge: "Reset Jim's Password" })
+      resetPasswordAsUser('jim', 'Samuel', 'I <3 Spock', "Reset Jim's Password")
     })
   })
 
   describe('as Bender', () => {
     it('should be able to reset password with his security answer', () => {
-      cy.task<string>('GetFromConfig', 'application.domain').then(
-        (appDomain: string) => {
-          cy.get('#email').type(`bender@${appDomain}`)
-        }
-      )
-      cy.wait('@securityQuestion')
-      cy.get('#securityAnswer').should('not.be.disabled').focus().type("Stop'n'Drop")
-      // recordings to properly fix behavior during test
-      cy.get('#newPassword').focus().type('Brannigan 8=o Leela')
-      cy.get('#newPasswordRepeat').focus().type('Brannigan 8=o Leela')
-      cy.get('#resetButton').click()
-
-      cy.get('.confirmation').should('not.be.hidden')
-      cy.expectChallengeSolved({ challenge: "Reset Bender's Password" })
+      resetPasswordAsUser('bender', "Stop'n'Drop", 'Brannigan 8=o Leela', "Reset Bender's Password")
     })
   })
 
   describe('as Bjoern', () => {
     describe('for his internal account', () => {
       it('should be able to reset password with his security answer', () => {
-        cy.task<string>('GetFromConfig', 'application.domain').then(
-          (appDomain: string) => {
-            cy.get('#email').type(`bjoern@${appDomain}`)
-          }
-        )
-        cy.wait('@securityQuestion')
-        cy.get('#securityAnswer').should('not.be.disabled').focus().type('West-2082')
-        // recordings to properly fix behavior during test
-        cy.get('#newPassword').focus().type('monkey birthday ')
-        cy.get('#newPasswordRepeat').focus().type('monkey birthday ')
-        cy.get('#resetButton').click()
-
-        cy.get('.confirmation').should('not.be.hidden')
-        cy.expectChallengeSolved({ challenge: "Reset Bjoern's Password" })
+        resetPasswordAsUser('bjoern', 'West-2082', 'monkey birthday ', "Reset Bjoern's Password")
       })
     })
 
@@ -72,11 +46,9 @@ describe('/#/forgot-password', () => {
         cy.get('#email').type('bjoern@owasp.org')
         cy.wait('@securityQuestion')
         cy.get('#securityAnswer').should('not.be.disabled').focus().type('Zaya')
-        // recordings to properly fix behavior during test
         cy.get('#newPassword').focus().type('kitten lesser pooch')
         cy.get('#newPasswordRepeat').focus().type('kitten lesser pooch')
         cy.get('#resetButton').click()
-
         cy.get('.confirmation').should('not.be.hidden')
         cy.expectChallengeSolved({ challenge: "Bjoern's Favorite Pet" })
       })
@@ -85,39 +57,13 @@ describe('/#/forgot-password', () => {
 
   describe('as Morty', () => {
     it('should be able to reset password with his security answer', () => {
-      cy.task<string>('GetFromConfig', 'application.domain').then(
-        (appDomain: string) => {
-          cy.get('#email').type(`morty@${appDomain}`)
-        }
-      )
-      cy.wait('@securityQuestion')
-      cy.get('#securityAnswer').should('not.be.disabled').focus().type('5N0wb41L')
-      // recordings to properly fix behavior during test
-      cy.get('#newPassword').focus().type('iBurri3dMySe1f!')
-      cy.get('#newPasswordRepeat').focus().type('iBurri3dMySe1f!')
-      cy.get('#resetButton').click()
-
-      cy.get('.confirmation').should('not.be.hidden')
-      cy.expectChallengeSolved({ challenge: "Reset Morty's Password" })
+      resetPasswordAsUser('morty', '5N0wb41L', 'iBurri3dMySe1f!', "Reset Morty's Password")
     })
   })
 
   describe('as Uvogin', () => {
     it('should be able to reset password with his security answer', () => {
-      cy.task<string>('GetFromConfig', 'application.domain').then(
-        (appDomain: string) => {
-          cy.get('#email').type(`uvogin@${appDomain}`)
-        }
-      )
-      cy.wait('@securityQuestion')
-      cy.get('#securityAnswer').should('not.be.disabled').focus().type('Silence of the Lambs')
-      // Cypress recordings to properly fix behavior during test
-      cy.get('#newPassword').focus().type('ora-ora > muda-muda')
-      cy.get('#newPasswordRepeat').focus().type('ora-ora > muda-muda')
-      cy.get('#resetButton').click()
-
-      cy.get('.confirmation').should('not.be.hidden')
-      cy.expectChallengeSolved({ challenge: "Reset Uvogin's Password" })
+      resetPasswordAsUser('uvogin', 'Silence of the Lambs', 'ora-ora > muda-muda', "Reset Uvogin's Password")
     })
   })
 })
