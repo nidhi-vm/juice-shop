@@ -71,7 +71,7 @@ export class LoginComponent implements OnInit {
         const authorizedRedirect = config.application.googleOauth.authorizedRedirects.find(r => r.uri === this.redirectUri)
         if (authorizedRedirect) {
           this.oauthUnavailable = false
-          this.redirectUri = authorizedRedirect.proxy ? authorizedRedirect.proxy : authorizedRedirect.uri
+          this.redirectUri = authorizedRedirect.proxy ?? authorizedRedirect.uri
         } else {
           this.oauthUnavailable = true
           console.log(this.redirectUri + ' is not an authorized redirect URI for this application.')
