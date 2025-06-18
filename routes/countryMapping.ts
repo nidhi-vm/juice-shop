@@ -18,7 +18,7 @@ export function countryMapping (config = configModule) {
       }
     } catch (err) {
       logger.warn('Country mapping was requested but was not found in the selected config file. Take a look at the fbctf.yml config file to find out how to configure the country mappings required by FBCTF.')
-      res.status(500).send()
+      res.status(500).send(err.message) // Handle the exception by sending the error message
     }
   }
 }
