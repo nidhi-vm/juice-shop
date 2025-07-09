@@ -193,11 +193,10 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     this.basketService.find(Number(sessionStorage.getItem('bid'))).subscribe((basket) => {
       const productsInBasket: any = basket.Products
       let found = false
-      for (let i = 0; i < productsInBasket.length; i++) {
-        if (productsInBasket[i].id === id) {
+      for (const product of productsInBasket) {
+        if (product.id === id) {
           found = true
-          this.basketService.get(productsInBasket[i].BasketItem.id).subscribe((existingBasketItem) => {
-            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+          this.basketService.get(product.BasketItem.id).subscribe((existingBasketItem) => {
             const newQuantity = existingBasketItem.quantity + 1
             this.basketService.put(existingBasketItem.id, { quantity: newQuantity }).subscribe((updatedBasketItem) => {
               this.productService.get(updatedBasketItem.ProductId).subscribe((product) => {
