@@ -18,11 +18,7 @@ describe('webhook', () => {
 
   describe('notify', () => {
     it('ignores errors where no webhook URL is provided via environment variable', async () => {
-      try {
-        await webhook.notify(challenge)
-      } catch (error) {
-        chai.assert.fail('webhook.notify should not throw an error when no webhook URL is provided')
-      }
+      await webhook.notify(challenge)
     })
 
     it('fails when supplied webhook is not a valid URL', async () => {
