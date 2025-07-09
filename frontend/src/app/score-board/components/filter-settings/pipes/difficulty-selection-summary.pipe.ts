@@ -39,7 +39,9 @@ function breakDifficultiesIntoNeighboringGroups (difficulties: Array<1 | 2 | 3 |
       }
     }
   }
-  difficultyGroups.push(currentGroup)
+  if (currentGroup) {
+    difficultyGroups.push(currentGroup)
+  }
   return difficultyGroups
 }
 
