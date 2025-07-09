@@ -39,7 +39,7 @@ describe('/rest/products/:id/reviews', () => {
       .expect('jsonTypes', reviewResponseSchema)
   })
 
-  xit('GET product reviews by alphanumeric non-mongoDB-command product id', () => { // FIXME Turn on when #1960 is resolved
+  it('GET product reviews by alphanumeric non-mongoDB-command product id', () => {
     return frisby.get(`${REST_URL}/products/kaboom/reviews`)
       .expect('status', 400)
   })
