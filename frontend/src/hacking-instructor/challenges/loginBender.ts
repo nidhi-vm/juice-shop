@@ -19,7 +19,8 @@ export const LoginBenderInstruction: ChallengeInstruction = {
         "To start this challenge, you'll have to log out first.",
       fixture: '#navbarAccount',
       unskippable: true,
-      resolved: waitForLogOut() // TODO Add check if "Login Admin" is solved and if not recommend doing that first
+      resolved: waitForLogOut(), 
+      recommendation: "Please complete the 'Login Admin' challenge before proceeding."
     },
     {
       text:
