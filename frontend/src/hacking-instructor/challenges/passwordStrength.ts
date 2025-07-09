@@ -11,6 +11,7 @@ import {
   waitForAngularRouteToBeVisited, waitForLogOut
 } from '../helpers/helpers'
 import { type ChallengeInstruction } from '../'
+import config from '../config' // Import the config
 
 export const PasswordStrengthInstruction: ChallengeInstruction = {
   name: 'Password Strength',
@@ -40,7 +41,7 @@ export const PasswordStrengthInstruction: ChallengeInstruction = {
       text: "Enter the admin's email address into the **email field**.",
       fixture: '#email',
       unskippable: true,
-      resolved: waitForInputToHaveValue('#email', 'admin@juice-sh.op') // TODO Use domain from config instead
+      resolved: waitForInputToHaveValue('#email', `admin@${config.emailDomain}`) // Use domain from config
     },
     {
       text: 'Now for the password. Lucky for us, the admin chose a really, really, **really** stupid one. Just try any that comes to your mind!',
