@@ -52,7 +52,8 @@ export async function verify (req: Request, res: Response) {
 
     res.json({ authentication: { token, bid: basket.id, umail: user.email } })
   } catch (error) {
-    res.status(401).send()
+    console.error(error); // Log the error for debugging
+    res.status(401).send(error.message); // Send the error message for better debugging
   }
 }
 
@@ -87,7 +88,8 @@ export async function status (req: Request, res: Response) {
       })
     }
   } catch (error) {
-    res.status(401).send()
+    console.error(error); // Log the error for debugging
+    res.status(401).send(error.message); // Send the error message for better debugging
   }
 }
 
@@ -138,7 +140,8 @@ export async function setup (req: Request, res: Response) {
 
     res.status(200).send()
   } catch (error) {
-    res.status(401).send()
+    console.error(error); // Log the error for debugging
+    res.status(401).send(error.message); // Send the error message for better debugging
   }
 }
 
@@ -171,6 +174,7 @@ export async function disable (req: Request, res: Response) {
 
     res.status(200).send()
   } catch (error) {
-    res.status(401).send()
+    console.error(error); // Log the error for debugging
+    res.status(401).send(error.message); // Send the error message for better debugging
   }
 }
