@@ -95,9 +95,7 @@ async function processQuery (user: User, req: Request, res: Response, next: Next
   try {
     const response = await bot.respond(req.body.query, `${user.id}`)
     if (response.action === 'function') {
-      // @ts-expect-error FIXME unclean usage of any type as index
-      if (response.handler && botUtils[response.handler]) {
-        // @ts-expect-error FIXME unclean usage of any type as index
+      if (response.handler && typeof botUtils[response.handler] === 'function') {
         res.status(200).json(await botUtils[response.handler](req.body.query, user))
       } else {
         res.status(200).json({
