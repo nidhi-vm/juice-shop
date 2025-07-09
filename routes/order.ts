@@ -67,36 +67,7 @@ export function placeOrder () {
           let totalPoints = 0
           basket.Products?.forEach(({ BasketItem, price, deluxePrice, name, id }) => {
             if (BasketItem != null) {
-              challengeUtils.solveIf(challenges.christmasSpecialChallenge, () => { return BasketItem.ProductId === products.christmasSpecial.id })
-              QuantityModel.findOne({ where: { ProductId: BasketItem.ProductId } }).then((product: any) => {
-                const newQuantity = product.quantity - BasketItem.quantity
-                QuantityModel.update({ quantity: newQuantity }, { where: { ProductId: BasketItem?.ProductId } }).catch((error: unknown) => {
-                  next(error)
-                })
-              }).catch((error: unknown) => {
-                next(error)
-              })
-              let itemPrice: number
-              if (security.isDeluxe(req)) {
-                itemPrice = deluxePrice
-              } else {
-                itemPrice = price
-              }
-              const itemTotal = itemPrice * BasketItem.quantity
-              const itemBonus = Math.round(itemPrice / 10) * BasketItem.quantity
-              const product = {
-                quantity: BasketItem.quantity,
-                id,
-                name: req.__(name),
-                price: itemPrice,
-                total: itemTotal,
-                bonus: itemBonus
-              }
-              basketProducts.push(product)
-              doc.text(`${BasketItem.quantity}x ${req.__(name)} ${req.__('ea.')} ${itemPrice} = ${itemTotal}¤`)
-              doc.moveDown()
-              totalPrice += itemTotal
-              totalPoints += itemBonus
+              handleBasketItem(BasketItem, price, deluxePrice, name, id, totalPrice, totalPoints, basketProducts, doc, next)
             }
           })
           doc.moveDown()
@@ -173,6 +144,39 @@ export function placeOrder () {
         next(error)
       })
   }
+}
+
+function handleBasketItem(BasketItem: any, price: number, deluxePrice: number, name: string, id: number, totalPrice: number, totalPoints: number, basketProducts: Product[], doc: PDFDocument, next: NextFunction) {
+  challengeUtils.solveIf(challenges.christmasSpecialChallenge, () => { return BasketItem.ProductId === products.christmasSpecial.id })
+  QuantityModel.findOne({ where: { ProductId: BasketItem.ProductId } }).then((product: any) => {
+    const newQuantity = product.quantity - BasketItem.quantity
+    QuantityModel.update({ quantity: newQuantity }, { where: { ProductId: BasketItem?.ProductId } }).catch((error: unknown) => {
+      next(error)
+    })
+  }).catch((error: unknown) => {
+    next(error)
+  })
+  let itemPrice: number
+  if (security.isDeluxe(req)) {
+    itemPrice = deluxePrice
+  } else {
+    itemPrice = price
+  }
+  const itemTotal = itemPrice * BasketItem.quantity
+  const itemBonus = Math.round(itemPrice / 10) * BasketItem.quantity
+  const product = {
+    quantity: BasketItem.quantity,
+    id,
+    name: req.__(name),
+    price: itemPrice,
+    total: itemTotal,
+    bonus: itemBonus
+  }
+  basketProducts.push(product)
+  doc.text(`${BasketItem.quantity}x ${req.__(name)} ${req.__('ea.')} ${itemPrice} = ${itemTotal}¤`)
+  doc.moveDown()
+  totalPrice += itemTotal
+  totalPoints += itemBonus
 }
 
 function calculateApplicableDiscount (basket: BasketModel, req: Request) {
