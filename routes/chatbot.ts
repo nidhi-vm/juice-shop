@@ -22,7 +22,7 @@ import { challenges } from '../data/datacache'
 
 let trainingFile = config.get<string>('application.chatBot.trainingData')
 let testCommand: string
-export const bot: Bot | null = null
+export let bot: Bot | null = null
 
 export async function initializeChatbot () {
   if (utils.isUrl(trainingFile)) {
@@ -70,9 +70,12 @@ async function processQuery (user: User, req: Request, res: Response, next: Next
       })
     } catch (err) {
       next(new Error('Blocked illegal activity by ' + req.socket.remoteAddress))
-      return
     }
-  } else if (bot.factory.run(`currentUser('${user.id}')`) !== username) {
+    return
+  }
+
+  if (bot.factory.run(`currentUser('${user.id}')`) !== username) {
+    bot.addUser(`${user.id}`, username)
     try {
       bot.addUser(`${user.id}`, username)
     } catch (err) {
@@ -160,7 +163,7 @@ export const status = function status () {
       })
       return
     }
-    const token = req.cookies.token || utils.jwtFrom(req)
+    const token = req.cookies.token ?? utils.jwtFrom(req)
     if (!token) {
       res.status(200).json({
         status: bot.training.state,
@@ -207,7 +210,7 @@ export function process () {
         body: `${config.get<string>('application.chatBot.name')} isn't ready at the moment, please wait while I set things up`
       })
     }
-    const token = req.cookies.token || utils.jwtFrom(req)
+    const token = req.cookies.token ?? utils.jwtFrom(req)
     if (!token) {
       res.status(400).json({
         error: 'Unauthenticated user'
