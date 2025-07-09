@@ -31,7 +31,7 @@ describe('challengeTutorialSequence', () => {
     for (const { tutorial } of challenges) {
       if (tutorial) {
         const order: string = tutorial.order
-        if (!Object.prototype.hasOwnProperty.call(tutorialOrderCounts, order)) {
+        if (!Object.hasOwn(tutorialOrderCounts, order)) {
           tutorialOrderCounts[order] = 0
         }
         tutorialOrderCounts[order]++
