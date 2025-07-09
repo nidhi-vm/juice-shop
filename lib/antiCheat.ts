@@ -16,13 +16,26 @@ import * as utils from './utils'
 import median from 'median'
 import { type ChallengeKey } from 'models/challenge'
 
-const coupledChallenges = { // TODO prevent also near-identical challenges (e.g. all null byte file access or dom xss + bonus payload etc.) from counting as cheating
+const coupledChallenges = { 
   loginAdminChallenge: ['weakPasswordChallenge'],
   nullByteChallenge: ['easterEggLevelOneChallenge', 'forgottenDevBackupChallenge', 'forgottenBackupChallenge', 'misplacedSignatureFileChallenge'],
   deprecatedInterfaceChallenge: ['uploadTypeChallenge', 'xxeFileDisclosureChallenge', 'xxeDosChallenge', 'yamlBombChallenge'],
   uploadSizeChallenge: ['uploadTypeChallenge', 'xxeFileDisclosureChallenge', 'xxeDosChallenge', 'yamlBombChallenge'],
   uploadTypeChallenge: ['uploadSizeChallenge', 'xxeFileDisclosureChallenge', 'xxeDosChallenge', 'yamlBombChallenge']
 }
+
+// Function to check for near-identical challenges
+const isNearIdenticalChallenge = (challengeKey: string, previousChallengeKey: string): boolean => {
+  const nearIdenticalPairs = [
+    ['nullByteChallenge', 'loginAdminChallenge'],
+    ['domXSSChallenge', 'bonusPayloadChallenge']
+  ];
+  return nearIdenticalPairs.some(pair => 
+    (pair[0] === challengeKey && pair[1] === previousChallengeKey) || 
+    (pair[1] === challengeKey && pair[0] === previousChallengeKey)
+  );
+}
+
 const trivialChallenges = ['errorHandlingChallenge', 'privacyPolicyChallenge', 'closeNotificationsChallenge']
 
 const solves: Array<{ challenge: any, phase: string, timestamp: Date, cheatScore: number }> = [{ challenge: {}, phase: 'server start', timestamp: new Date(), cheatScore: 0 }] // seed with server start timestamp
@@ -57,7 +70,7 @@ export const calculateCheatScore = (challenge: Challenge) => {
   let timeFactor = 2
   timeFactor *= (config.get('challenges.showHints') ? 1 : 1.5)
   timeFactor *= (challenge.tutorialOrder && config.get('hackingInstructor.isEnabled') ? 0.5 : 1)
-  if (areCoupled(challenge, previous().challenge) || isTrivial(challenge)) {
+  if (areCoupled(challenge, previous().challenge) || isTrivial(challenge) || isNearIdenticalChallenge(challenge.key, previous().challenge.key)) {
     timeFactor = 0
   }
 
