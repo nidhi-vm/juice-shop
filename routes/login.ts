@@ -45,7 +45,8 @@ export function login () {
             }
           })
         } else if (user.data?.id) {
-          afterLogin(user as { data: User, bid: number }, res, next)
+          // @ts-expect-error FIXME some properties missing in user - vuln-code-snippet hide-line
+          afterLogin(user, res, next)
         } else {
           res.status(401).send(res.__('Invalid email or password.'))
         }
