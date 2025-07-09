@@ -61,25 +61,25 @@ function verifySecurityAnswerChallenges (user: UserModel, answer: string) {
   challengeUtils.solveIf(challenges.resetPasswordBjoernOwaspChallenge, () => { return user.id === users.bjoernOwasp.id && answer === 'Zaya' })
   challengeUtils.solveIf(challenges.resetPasswordUvoginChallenge, () => { return user.id === users.uvogin.id && answer === 'Silence of the Lambs' })
   challengeUtils.solveIf(challenges.geoStalkingMetaChallenge, () => {
-    const securityAnswer = (() => {
+    const securityAnswer = ((() => {
       const memories = config.get<MemoryConfig[]>('memories')
       for (const memory of memories) {
         if (memory.geoStalkingMetaSecurityAnswer) {
           return memory.geoStalkingMetaSecurityAnswer
         }
       }
-    })()
+    })())
     return user.id === users.john.id && answer === securityAnswer
   })
   challengeUtils.solveIf(challenges.geoStalkingVisualChallenge, () => {
-    const securityAnswer = (() => {
+    const securityAnswer = ((() => {
       const memories = config.get<MemoryConfig[]>('memories')
       for (const memory of memories) {
         if (memory.geoStalkingVisualSecurityAnswer) {
           return memory.geoStalkingVisualSecurityAnswer
         }
       }
-    })()
+    })())
     return user.id === users.emma.id && answer === securityAnswer
   })
 }
