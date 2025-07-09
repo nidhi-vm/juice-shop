@@ -6,7 +6,6 @@
 import { type Request, type Response, type NextFunction } from 'express'
 
 import * as challengeUtils from '../lib/challengeUtils'
-import { type ProductModel } from '../models/product'
 import { MemoryModel } from '../models/memory'
 import { challenges } from '../data/datacache'
 import * as security from '../lib/insecurity'
@@ -26,7 +25,7 @@ export function dataExport () {
         orders: Array<{
           orderId: string
           totalPrice: number
-          products: ProductModel[]
+          products: any[] // Changed from ProductModel[] to any[] to avoid unused import
           bonus: number
           eta: string
         }>
@@ -58,56 +57,37 @@ export function dataExport () {
         })
       })
 
-      db.ordersCollection.find({ email: updatedEmail }).then((orders: Array<{
-        orderId: string
-        totalPrice: number
-        products: ProductModel[]
-        bonus: number
-        eta: string
-      }>) => {
-        if (orders.length > 0) {
-          orders.forEach(order => {
-            userData.orders.push({
-              orderId: order.orderId,
-              totalPrice: order.totalPrice,
-              products: [...order.products],
-              bonus: order.bonus,
-              eta: order.eta
-            })
+      const orders = await db.ordersCollection.find({ email: updatedEmail })
+      if (orders.length > 0) {
+        orders.forEach(order => {
+          userData.orders.push({
+            orderId: order.orderId,
+            totalPrice: order.totalPrice,
+            products: [...order.products],
+            bonus: order.bonus,
+            eta: order.eta
           })
-        }
-
-        db.reviewsCollection.find({ author: email }).then((reviews: Array<{
-          message: string
-          author: string
-          product: number
-          likesCount: number
-          likedBy: string
-        }>) => {
-          if (reviews.length > 0) {
-            reviews.forEach(review => {
-              userData.reviews.push({
-                message: review.message,
-                author: review.author,
-                productId: review.product,
-                likesCount: review.likesCount,
-                likedBy: review.likedBy
-              })
-            })
-          }
-          const emailHash = security.hash(email).slice(0, 4)
-          for (const order of userData.orders) {
-            challengeUtils.solveIf(challenges.dataExportChallenge, () => { return order.orderId.split('-')[0] !== emailHash })
-          }
-          res.status(200).send({ userData: JSON.stringify(userData, null, 2), confirmation: 'Your data export will open in a new Browser window.' })
-        },
-        () => {
-          next(new Error(`Error retrieving reviews for ${updatedEmail}`))
         })
-      },
-      () => {
-        next(new Error(`Error retrieving orders for ${updatedEmail}`))
-      })
+      }
+
+      const reviews = await db.reviewsCollection.find({ author: email })
+      if (reviews.length > 0) {
+        reviews.forEach(review => {
+          userData.reviews.push({
+            message: review.message,
+            author: review.author,
+            productId: review.product,
+            likesCount: review.likesCount,
+            likedBy: review.likedBy
+          })
+        })
+      }
+
+      const emailHash = security.hash(email).slice(0, 4)
+      for (const order of userData.orders) {
+        challengeUtils.solveIf(challenges.dataExportChallenge, () => { return order.orderId.split('-')[0] !== emailHash })
+      }
+      res.status(200).send({ userData: JSON.stringify(userData, null, 2), confirmation: 'Your data export will open in a new Browser window.' })
     } else {
       next(new Error('Blocked illegal activity by ' + req.socket.remoteAddress))
     }
