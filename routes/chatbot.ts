@@ -22,7 +22,7 @@ import { challenges } from '../data/datacache'
 
 let trainingFile = config.get<string>('application.chatBot.trainingData')
 let testCommand: string
-export let bot: Bot | null = null
+export const bot: Bot | null = null
 
 export async function initializeChatbot () {
   if (utils.isUrl(trainingFile)) {
@@ -70,12 +70,9 @@ async function processQuery (user: User, req: Request, res: Response, next: Next
       })
     } catch (err) {
       next(new Error('Blocked illegal activity by ' + req.socket.remoteAddress))
+      return
     }
-    return
-  }
-
-  if (bot.factory.run(`currentUser('${user.id}')`) !== username) {
-    bot.addUser(`${user.id}`, username)
+  } else if (bot.factory.run(`currentUser('${user.id}')`) !== username) {
     try {
       bot.addUser(`${user.id}`, username)
     } catch (err) {
@@ -95,7 +92,9 @@ async function processQuery (user: User, req: Request, res: Response, next: Next
   try {
     const response = await bot.respond(req.body.query, `${user.id}`)
     if (response.action === 'function') {
-      if (response.handler && typeof botUtils[response.handler] === 'function') {
+      // @ts-expect-error FIXME unclean usage of any type as index
+      if (response.handler && botUtils[response.handler]) {
+        // @ts-expect-error FIXME unclean usage of any type as index
         res.status(200).json(await botUtils[response.handler](req.body.query, user))
       } else {
         res.status(200).json({
