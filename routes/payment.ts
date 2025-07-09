@@ -6,7 +6,7 @@
 import { type Request, type Response, type NextFunction } from 'express'
 import { CardModel } from '../models/card'
 
-interface displayCard {
+interface DisplayCard {
   UserId: number
   id: number
   fullName: string
@@ -17,10 +17,10 @@ interface displayCard {
 
 export function getPaymentMethods () {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const displayableCards: displayCard[] = []
+    const displayableCards: DisplayCard[] = []
     const cards = await CardModel.findAll({ where: { UserId: req.body.UserId } })
     cards.forEach(card => {
-      const displayableCard: displayCard = {
+      const displayableCard: DisplayCard = {
         UserId: card.UserId,
         id: card.id,
         fullName: card.fullName,
@@ -39,7 +39,7 @@ export function getPaymentMethods () {
 export function getPaymentMethodById () {
   return async (req: Request, res: Response, next: NextFunction) => {
     const card = await CardModel.findOne({ where: { id: req.params.id, UserId: req.body.UserId } })
-    const displayableCard: displayCard = {
+    const displayableCard: DisplayCard = {
       UserId: 0,
       id: 0,
       fullName: '',
