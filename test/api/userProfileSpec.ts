@@ -56,7 +56,7 @@ describe('/profile', () => {
       .expect('status', 302)
   })
 
-  xit('POST update username is forbidden for unauthenticated user', () => { // FIXME runs into "socket hang up"
+  it('POST update username is forbidden for unauthenticated user', () => {
     const form = frisby.formData()
     form.append('username', 'Localhorst')
 
