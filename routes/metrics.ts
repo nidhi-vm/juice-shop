@@ -17,7 +17,7 @@ import config from 'config'
 import * as utils from '../lib/utils'
 import { totalCheatScore } from '../lib/antiCheat'
 import * as accuracy from '../lib/accuracy'
-import { ordersCollection } from '../data/mongodb'
+import { reviewsCollection, ordersCollection } from '../data/mongodb'
 import { challenges } from '../data/datacache'
 import * as Prometheus from 'prom-client'
 import onFinished from 'on-finished'
@@ -153,6 +153,7 @@ export function observeMetrics () {
       for (const { difficulty, category, solved } of Object.values<ChallengeModel>(challenges)) {
         const key = `${difficulty}:${category}`
 
+        // Increment by one if solved, when not solved increment by 0. This ensures that even unsolved challenges are set to , instead of not being set at all
         challengeStatuses.set(key, (challengeStatuses.get(key) || 0) + (solved ? 1 : 0))
         challengeCount.set(key, (challengeCount.get(key) || 0) + 1)
       }
@@ -165,36 +166,35 @@ export function observeMetrics () {
       }
 
       void retrieveChallengesWithCodeSnippet().then(challenges => {
-        const countChallenges = async (status: number, phase: string) => {
-          try {
-            const count: number = await ChallengeModel.count({ where: { codingChallengeStatus: { [Op.eq]: status } } });
-            codingChallengesProgressMetrics.set({ phase }, count);
-          } catch {
-            throw new Error('Unable to retrieve and count such challenges. Please try again');
-          }
-        };
+        ChallengeModel.count({ where: { codingChallengeStatus: { [Op.eq]: 1 } } }).then((count: number) => {
+          codingChallengesProgressMetrics.set({ phase: 'find it' }, count)
+        }).catch(() => {
+          throw new Error('Unable to retrieve and count such challenges. Please try again')
+        })
 
-        countChallenges(1, 'find it');
-        countChallenges(2, 'fix it');
+        ChallengeModel.count({ where: { codingChallengeStatus: { [Op.eq]: 2 } } }).then((count: number) => {
+          codingChallengesProgressMetrics.set({ phase: 'fix it' }, count)
+        }).catch((_: unknown) => {
+          throw new Error('Unable to retrieve and count such challenges. Please try again')
+        })
 
-        const countUnsolvedChallenges = async () => {
-          try {
-            const count: number = await ChallengeModel.count({ where: { codingChallengeStatus: { [Op.ne]: 0 } } });
-            codingChallengesProgressMetrics.set({ phase: 'unsolved' }, challenges.length - count);
-          } catch {
-            throw new Error('Unable to retrieve and count such challenges. Please try again');
-          }
-        };
+        ChallengeModel.count({ where: { codingChallengeStatus: { [Op.ne]: 0 } } }).then((count: number) => {
+          codingChallengesProgressMetrics.set({ phase: 'unsolved' }, challenges.length - count)
+        }).catch((_: unknown) => {
+          throw new Error('Unable to retrieve and count such challenges. Please try again')
+        })
+      })
 
-        countUnsolvedChallenges();
-      });
-
-      cheatScoreMetrics.set(totalCheatScore());
-      accuracyMetrics.set({ phase: 'find it' }, accuracy.totalFindItAccuracy());
-      accuracyMetrics.set({ phase: 'fix it' }, accuracy.totalFixItAccuracy());
+      cheatScoreMetrics.set(totalCheatScore())
+      accuracyMetrics.set({ phase: 'find it' }, accuracy.totalFindItAccuracy())
+      accuracyMetrics.set({ phase: 'fix it' }, accuracy.totalFixItAccuracy())
 
       ordersCollection.count({}).then((orderCount: number) => {
         if (orderCount) orderMetrics.set(orderCount)
+      })
+
+      reviewsCollection.count({}).then((reviewCount: number) => {
+        if (reviewCount) interactionsMetrics.set({ type: 'review' }, reviewCount)
       })
 
       void UserModel.count({ where: { role: { [Op.eq]: 'customer' } } }).then((count: number) => {
