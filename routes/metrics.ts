@@ -154,8 +154,8 @@ export function observeMetrics () {
         const key = `${difficulty}:${category}`
 
         // Increment by one if solved, when not solved increment by 0. This ensures that even unsolved challenges are set to , instead of not being set at all
-        challengeStatuses.set(key, (challengeStatuses.get(key) || 0) + (solved ? 1 : 0))
-        challengeCount.set(key, (challengeCount.get(key) || 0) + 1)
+        challengeStatuses.set(key, (challengeStatuses.get(key) ?? 0) + (solved ? 1 : 0))
+        challengeCount.set(key, (challengeCount.get(key) ?? 0) + 1)
       }
 
       for (const key of challengeStatuses.keys()) {
