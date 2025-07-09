@@ -43,7 +43,7 @@ describe('/chatbot', () => {
           cy.get('#message-input').type('...').type('{enter}')
 
           const genArr = Array.from({ length: 100 }, (v, k) => k + 1)
-          cy.wrap(genArr).eachSeries(() => {
+          cy.wrap(genArr).each((_, index) => {
             cy.get('#message-input')
               .type(couponIntent.utterances[0])
               .type('{enter}')
@@ -53,8 +53,9 @@ describe('/chatbot', () => {
               .then((text: string) => {
                 if (text.includes("Oooookay, if you promise to stop nagging me here's a 10% coupon code for you")) return false
               })
+          }).then(() => {
+            cy.expectChallengeSolved({ challenge: 'Bully Chatbot' })
           })
-          cy.expectChallengeSolved({ challenge: 'Bully Chatbot' })
         }
       )
     })
