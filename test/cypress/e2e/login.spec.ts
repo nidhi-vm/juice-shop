@@ -125,8 +125,8 @@ describe('/#/login', () => {
 
       cy.task<string>('GenerateAuthenticator', 'IFTXE3SPOEYVURT2MRYGI52TKJ4HC3KH').then(
         (totpToken: string) => {
-          void cy.get('#totpToken').type(totpToken)
-          void cy.get('#totpSubmitButton').click()
+          cy.get('#totpToken').type(totpToken)
+          cy.get('#totpSubmitButton').click()
         }
       )
       cy.expectChallengeSolved({ challenge: 'Two Factor Authentication' })
