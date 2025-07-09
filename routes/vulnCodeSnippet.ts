@@ -23,12 +23,10 @@ interface VerdictRequestBody {
 }
 
 const setStatusCode = (error: any) => {
-  switch (error.name) {
-    case 'BrokenBoundary':
-      return 422
-    default:
-      return 200
+  if (error.name === 'BrokenBoundary') {
+    return 422
   }
+  return 200
 }
 
 export const retrieveCodeSnippet = async (challengeKey: string) => {
