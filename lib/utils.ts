@@ -19,7 +19,6 @@ import isDocker from './is-docker'
 import isWindows from './is-windows'
 export { default as isDocker } from './is-docker'
 export { default as isWindows } from './is-windows'
-// import isGitpod from 'is-gitpod') // FIXME Roll back to this when https://github.com/dword-design/is-gitpod/issues/94 is resolve
 const isGitpod = () => false
 
 const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
@@ -42,7 +41,7 @@ export const startsWith = (str: string, prefix: string) => str ? str.indexOf(pre
 
 export const endsWith = (str?: string, suffix?: string) => (str && suffix) ? str.includes(suffix, str.length - suffix.length) : false
 
-export const contains = (str: string, element: string) => str ? str.includes(element) : false // TODO Inline all usages as this function is not adding any functionality to String.includes
+export const contains = (str: string, element: string) => str ? str.includes(element) : false
 
 export const containsEscaped = function (str: string, element: string) {
   return contains(str, element.replace(/"/g, '\\"'))
@@ -67,7 +66,6 @@ export const trunc = function (str: string, length: number) {
 
 export const version = (module?: string) => {
   if (module) {
-    // @ts-expect-error FIXME Ignoring any type issue on purpose
     return packageJson.dependencies[module]
   } else {
     return packageJson.version
