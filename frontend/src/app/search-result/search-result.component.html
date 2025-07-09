@@ -26,9 +26,9 @@
               <div class="ribbon ribbon-top-left ribbon-sold" *ngIf="item.quantity <= 0"><span
                 >{{"LABEL_SOLD_OUT" | translate }}</span></div>
               <div (click)="showDetail(item)" aria-label="Click for more information about the product" class="product"
-                  matTooltip="Click for more information" matTooltipPosition="above">
+                  matTooltip="Click for more information" matTooltipPosition="above" tabindex="0" (keydown.enter)="showDetail(item)">
                 <img mat-card-image [src]="'assets/public/images/products/'+item.image" alt={{item.name}}
-                      class="img-responsive img-thumbnail" role="button">
+                      class="img-responsive img-thumbnail" (keydown.enter)="showDetail(item)" tabindex="0">
                 <div fxFlexAlign="center" fxFlex="40%">
                   <div class="item-name">
                     {{item.name}}
