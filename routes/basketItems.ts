@@ -23,13 +23,13 @@ export function addBasketItem () {
     const basketIds = []
     const quantities = []
 
-    for (let i = 0; i < result.length; i++) {
-      if (result[i].key === 'ProductId') {
-        productIds.push(result[i].value)
-      } else if (result[i].key === 'BasketId') {
-        basketIds.push(result[i].value)
-      } else if (result[i].key === 'quantity') {
-        quantities.push(result[i].value)
+    for (const item of result) {
+      if (item.key === 'ProductId') {
+        productIds.push(item.value)
+      } else if (item.key === 'BasketId') {
+        basketIds.push(item.value)
+      } else if (item.key === 'quantity') {
+        quantities.push(item.value)
       }
     }
 
