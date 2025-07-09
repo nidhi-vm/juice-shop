@@ -46,7 +46,7 @@ export class PurchaseBasketComponent implements OnInit {
     }
     this.load()
     this.userService.whoAmI().subscribe((data) => {
-      this.userEmail = data.email || 'anonymous'
+      this.userEmail = data.email ?? 'anonymous'
       this.userEmail = '(' + this.userEmail + ')'
     }, (err) => { console.log(err) })
   }
