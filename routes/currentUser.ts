@@ -16,6 +16,7 @@ export function retrieveLoggedInUser () {
         user = security.authenticatedUsers.get(req.cookies.token)
       }
     } catch (err) {
+      logger.error('Error verifying token: ' + utils.getErrorMessage(err))
       user = undefined
     } finally {
       const response = { user: { id: (user?.data ? user.data.id : undefined), email: (user?.data ? user.data.email : undefined), lastLoginIp: (user?.data ? user.data.lastLoginIp : undefined), profileImage: (user?.data ? user.data.profileImage : undefined) } }
