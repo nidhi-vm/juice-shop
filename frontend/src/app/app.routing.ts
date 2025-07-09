@@ -233,7 +233,7 @@ const routes: Routes = [
   // vuln-code-snippet start tokenSaleChallenge
   {
     matcher: oauthMatcher,
-    data: { params: (window.location.href).substr(window.location.href.indexOf('#')) },
+    data: { params: (window.location.href).slice(window.location.href.indexOf('#')) },
     component: OAuthComponent
   },
   { // vuln-code-snippet neutral-line tokenSaleChallenge
