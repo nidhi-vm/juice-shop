@@ -24,7 +24,7 @@ export function upgradeToDeluxe () {
       if (req.body.paymentMode === 'wallet') {
         const wallet = await WalletModel.findOne({ where: { UserId: req.body.UserId } })
         if ((wallet != null) && wallet.balance < 49) {
-          res.status(400).json({ status: 'error', error: 'Insuffienct funds in Wallet' })
+          res.status(400).json({ status: 'error', error: 'Insufficient funds in Wallet' })
           return
         } else {
           await WalletModel.decrement({ balance: 49 }, { where: { UserId: req.body.UserId } })
