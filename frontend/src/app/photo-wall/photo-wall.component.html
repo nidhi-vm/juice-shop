@@ -9,7 +9,7 @@
     <div>
       <div class="grid" *ngIf="!emptyState; else emptyResult">
                   <span *ngFor="let image of slideshowDataSource" class="container mat-elevation-z6">
-                      <img src="{{ image.url }}" alt="{{ image.caption }}" class="image">
+                      <img src="{{ image.url }}" alt="{{ image.caption | replace: 'image ': '' }}" class="image">
                       <div class="overlay">
                           <div>{{ image.caption }}</div>
                           <a *ngIf="twitterHandle"
