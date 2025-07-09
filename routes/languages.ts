@@ -38,7 +38,7 @@ export function getLanguageList () { // TODO Refactor and extend to also load ba
               icons: locale?.icons,
               shortKey: locale?.shortKey,
               percentage,
-              gauge: (percentage > 90 ? 'full' : (percentage > 70 ? 'three-quarters' : (percentage > 50 ? 'half' : (percentage > 30 ? 'quarter' : 'empty'))))
+              gauge: getGauge(percentage)
             }
             if (!(fileName === 'en.json' || fileName === 'tlh_AA.json')) {
               languages.push(lang)
@@ -54,19 +54,27 @@ export function getLanguageList () { // TODO Refactor and extend to also load ba
       })
     })
 
+    function getGauge(percentage: number): string {
+      if (percentage > 90) return 'full';
+      if (percentage > 70) return 'three-quarters';
+      if (percentage > 50) return 'half';
+      if (percentage > 30) return 'quarter';
+      return 'empty';
+    }
+
     async function calcPercentage (fileContent: any, enContent: any): Promise<number> {
       const totalStrings = Object.keys(enContent).length
       let differentStrings = 0
       return await new Promise((resolve, reject) => {
         try {
           for (const key in fileContent) {
-            if (Object.hasOwn(fileContent, key) && fileContent[key] !== enContent[key]) {
+            if (Object.prototype.hasOwnProperty.call(fileContent, key) && fileContent[key] !== enContent[key]) {
               differentStrings++
             }
           }
           resolve((differentStrings / totalStrings) * 100)
         } catch (err) {
-          reject(err)
+          reject(new Error(`Error calculating percentage: ${err}`))
         }
       })
     }
