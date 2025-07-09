@@ -76,32 +76,20 @@ export class AboutComponent implements OnInit {
         })
       ).subscribe((config) => {
         if (config?.application?.social) {
-          if (config.application.social.blueSkyUrl) {
-            this.blueSkyUrl = config.application.social.blueSkyUrl
-          }
-          if (config.application.social.mastodonUrl) {
-            this.mastodonUrl = config.application.social.mastodonUrl
-          }
-          if (config.application.social.twitterUrl) {
-            this.twitterUrl = config.application.social.twitterUrl
-          }
-          if (config.application.social.facebookUrl) {
-            this.facebookUrl = config.application.social.facebookUrl
-          }
-          if (config.application.social.slackUrl) {
-            this.slackUrl = config.application.social.slackUrl
-          }
-          if (config.application.social.redditUrl) {
-            this.redditUrl = config.application.social.redditUrl
-          }
-          if (config.application.social.pressKitUrl) {
-            this.pressKitUrl = config.application.social.pressKitUrl
-          }
-          if (config.application.social.nftUrl) {
-            this.nftUrl = config.application.social.nftUrl
-          }
+          this.setSocialUrls(config.application.social);
         }
       })
+  }
+
+  private setSocialUrls(socialConfig: any): void {
+    this.blueSkyUrl = socialConfig.blueSkyUrl || this.blueSkyUrl;
+    this.mastodonUrl = socialConfig.mastodonUrl || this.mastodonUrl;
+    this.twitterUrl = socialConfig.twitterUrl || this.twitterUrl;
+    this.facebookUrl = socialConfig.facebookUrl || this.facebookUrl;
+    this.slackUrl = socialConfig.slackUrl || this.slackUrl;
+    this.redditUrl = socialConfig.redditUrl || this.redditUrl;
+    this.pressKitUrl = socialConfig.pressKitUrl || this.pressKitUrl;
+    this.nftUrl = socialConfig.nftUrl || this.nftUrl;
   }
 
   populateSlideshowFromFeedbacks () {
@@ -114,20 +102,16 @@ export class AboutComponent implements OnInit {
         })
       )
       .subscribe((feedbacks) => {
-        for (let i = 0; i < feedbacks.length; i++) {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          feedbacks[i].comment = `<span style="width: 90%; display:block;">${
-            feedbacks[i].comment
-          }<br/> (${this.stars[feedbacks[i].rating]})</span>`
-          feedbacks[i].comment = this.sanitizer.bypassSecurityTrustHtml(
-            feedbacks[i].comment
-          )
+        feedbacks.forEach((feedback, i) => {
+          feedback.comment = this.sanitizer.bypassSecurityTrustHtml(
+            `<span style="width: 90%; display:block;">${feedback.comment}<br/> (${this.stars[feedback.rating]})</span>`
+          );
 
           this.galleryRef.addImage({
             src: this.images[i % this.images.length],
-            args: feedbacks[i].comment
-          })
-        }
-      })
+            args: feedback.comment
+          });
+        });
+      });
   }
 }
