@@ -23,27 +23,24 @@ describe('fileUpload', () => {
     })
   })
 
+  const testUploadSizeChallenge = (size: number) => {
+    challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
+    req.file.size = size
+
+    checkUploadSize(req, res, () => {})
+
+    expect(challenges.uploadSizeChallenge.solved).to.equal(size > 100000);
+  }
+
   describe('should not solve "uploadSizeChallenge" when file size is', () => {
     const sizes = [0, 1, 100, 1000, 10000, 99999, 100000]
     sizes.forEach(size => {
-      it(`${size} bytes`, () => {
-        challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
-        req.file.size = size
-
-        checkUploadSize(req, res, () => {})
-
-        expect(challenges.uploadSizeChallenge.solved).to.equal(false)
-      })
+      it(`${size} bytes`, () => testUploadSizeChallenge(size));
     })
   })
 
   it('should solve "uploadSizeChallenge" when file size exceeds 100000 bytes', () => {
-    challenges.uploadSizeChallenge = { solved: false, save } as unknown as Challenge
-    req.file.size = 100001
-
-    checkUploadSize(req, res, () => {})
-
-    expect(challenges.uploadSizeChallenge.solved).to.equal(true)
+    testUploadSizeChallenge(100001);
   })
 
   it('should solve "uploadTypeChallenge" when file type is not PDF', () => {
