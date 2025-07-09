@@ -38,7 +38,7 @@ describe('challengeCountryMapping', () => {
     for (const key of Object.keys(countryMapping)) {
       const { code } = countryMapping[key]
 
-      if (!Object.prototype.hasOwnProperty.call(countryCodeCounts, code)) {
+      if (!Object.hasOwn(countryCodeCounts, code)) {
         countryCodeCounts[code] = 0
       }
       countryCodeCounts[code]++
