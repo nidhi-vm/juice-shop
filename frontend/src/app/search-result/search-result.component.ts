@@ -67,14 +67,13 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     private readonly router: Router, private readonly route: ActivatedRoute, private readonly sanitizer: DomSanitizer, private readonly ngZone: NgZone, private readonly io: SocketIoService,
     private readonly snackBarHelperService: SnackBarHelperService, private readonly cdRef: ChangeDetectorRef) { }
 
-  // vuln-code-snippet start restfulXssChallenge
   ngAfterViewInit () {
     const products = this.productService.search('')
     const quantities = this.quantityService.getAll()
     forkJoin([quantities, products]).subscribe(([quantities, products]) => {
       const dataTable: TableEntry[] = []
       this.tableData = products
-      this.trustProductDescription(products) // vuln-code-snippet neutral-line restfulXssChallenge
+      this.trustProductDescription(products)
       for (const product of products) {
         dataTable.push({
           name: product.name,
@@ -85,19 +84,9 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
           description: product.description
         })
       }
-      for (const quantity of quantities) {
-        const entry = dataTable.find((dataTableEntry) => {
-          return dataTableEntry.id === quantity.ProductId
-        })
-        if (entry === undefined) {
-          continue
-        }
-        entry.quantity = quantity.quantity
-      }
+      this.updateQuantities(dataTable, quantities);
       this.dataSource = new MatTableDataSource<TableEntry>(dataTable)
-      for (let i = 1; i <= Math.ceil(this.dataSource.data.length / 12); i++) {
-        this.pageSizeOptions.push(i * 12)
-      }
+      this.pageSizeOptions = Array.from({length: Math.ceil(this.dataSource.data.length / 12)}, (_, i) => (i + 1) * 12);
       this.paginator.pageSizeOptions = this.pageSizeOptions
       this.dataSource.paginator = this.paginator
       this.gridDataSource = this.dataSource.connect()
@@ -106,63 +95,64 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
       this.routerSubscription = this.router.events.subscribe(() => {
         this.filterTable()
       })
-      const challenge: string = this.route.snapshot.queryParams.challenge // vuln-code-snippet hide-start
+      const challenge: string = this.route.snapshot.queryParams.challenge
       if (challenge && this.route.snapshot.url.join('').match(/hacking-instructor/)) {
         this.startHackingInstructor(decodeURIComponent(challenge))
-      } // vuln-code-snippet hide-end
-      if (window.innerWidth < 2600) {
-        this.breakpoint = 4
-        if (window.innerWidth < 1740) {
-          this.breakpoint = 3
-          if (window.innerWidth < 1280) {
-            this.breakpoint = 2
-            if (window.innerWidth < 850) {
-              this.breakpoint = 1
-            }
-          }
-        }
-      } else {
-        this.breakpoint = 6
       }
+      this.updateBreakpoint(window.innerWidth);
       this.cdRef.detectChanges()
     }, (err) => { console.log(err) })
   }
 
-  trustProductDescription (tableData: any[]) { // vuln-code-snippet neutral-line restfulXssChallenge
-    for (const product of tableData) { // fixed code
-      product.description = this.sanitizer.bypassSecurityTrustHtml(product.description) // vuln-code-snippet vuln-line restfulXssChallenge
-    } // vuln-code-snippet neutral-line restfulXssChallenge
-  } // vuln-code-snippet neutral-line restfulXssChallenge
-  // vuln-code-snippet end restfulXssChallenge
-
-  ngOnDestroy () {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe()
-    }
-    if (this.productSubscription) {
-      this.productSubscription.unsubscribe()
-    }
-    if (this.dataSource) {
-      this.dataSource.disconnect()
+  trustProductDescription (tableData: any[]) {
+    for (let i = 0; i < tableData.length; i++) {
+      tableData[i].description = this.sanitizer.bypassSecurityTrustHtml(tableData[i].description)
     }
   }
 
-  // vuln-code-snippet start localXssChallenge xssBonusChallenge
+  updateQuantities(dataTable: TableEntry[], quantities: any[]) {
+    for (const quantity of quantities) {
+      const entry = dataTable.find((dataTableEntry) => dataTableEntry.id === quantity.ProductId)
+      if (entry) {
+        entry.quantity = quantity.quantity
+      }
+    }
+  }
+
+  updateBreakpoint(width: number) {
+    if (width < 2600) {
+      this.breakpoint = 4
+      if (width < 1740) {
+        this.breakpoint = 3
+        if (width < 1280) {
+          this.breakpoint = 2
+          if (width < 850) {
+            this.breakpoint = 1
+          }
+        }
+      }
+    } else {
+      this.breakpoint = 6
+    }
+  }
+
+  ngOnDestroy () {
+    this.routerSubscription?.unsubscribe()
+    this.productSubscription?.unsubscribe()
+    this.dataSource?.disconnect()
+  }
+
   filterTable () {
     let queryParam: string = this.route.snapshot.queryParams.q
     if (queryParam) {
       queryParam = queryParam.trim()
-      this.ngZone.runOutsideAngular(() => { // vuln-code-snippet hide-start
+      this.ngZone.runOutsideAngular(() => {
         this.io.socket().emit('verifyLocalXssChallenge', queryParam)
-      }) // vuln-code-snippet hide-end
+      })
       this.dataSource.filter = queryParam.toLowerCase()
-      this.searchValue = this.sanitizer.bypassSecurityTrustHtml(queryParam) // vuln-code-snippet vuln-line localXssChallenge xssBonusChallenge
+      this.searchValue = this.sanitizer.bypassSecurityTrustHtml(queryParam)
       this.gridDataSource.subscribe((result: any) => {
-        if (result.length === 0) {
-          this.emptyState = true
-        } else {
-          this.emptyState = false
-        }
+        this.emptyState = result.length === 0
       })
     } else {
       this.dataSource.filter = ''
@@ -170,7 +160,6 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
       this.emptyState = false
     }
   }
-  // vuln-code-snippet end localXssChallenge xssBonusChallenge
 
   startHackingInstructor (challengeName: string) {
     console.log(`Starting instructions for challenge "${challengeName}"`)
@@ -193,27 +182,10 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     this.basketService.find(Number(sessionStorage.getItem('bid'))).subscribe((basket) => {
       const productsInBasket: any = basket.Products
       let found = false
-      for (const product of productsInBasket) { // fixed code
-        if (product.id === id) {
+      for (let i = 0; i < productsInBasket.length; i++) {
+        if (productsInBasket[i].id === id) {
           found = true
-          this.basketService.get(product.BasketItem.id).subscribe((existingBasketItem) => {
-            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-            const newQuantity = existingBasketItem.quantity + 1
-            this.basketService.put(existingBasketItem.id, { quantity: newQuantity }).subscribe((updatedBasketItem) => {
-              this.productService.get(updatedBasketItem.ProductId).subscribe((product) => {
-                this.translateService.get('BASKET_ADD_SAME_PRODUCT', { product: product.name }).subscribe((basketAddSameProduct) => {
-                  this.snackBarHelperService.open(basketAddSameProduct, 'confirmBar')
-                  this.basketService.updateNumberOfCartItems()
-                }, (translationId) => {
-                  this.snackBarHelperService.open(translationId, 'confirmBar')
-                  this.basketService.updateNumberOfCartItems()
-                })
-              }, (err) => { console.log(err) })
-            }, (err) => {
-              this.snackBarHelperService.open(err.error?.error, 'errorBar')
-              console.log(err)
-            })
-          }, (err) => { console.log(err) })
+          this.handleExistingBasketItem(productsInBasket[i]);
           break
         }
       }
@@ -236,25 +208,30 @@ export class SearchResultComponent implements OnDestroy, AfterViewInit {
     }, (err) => { console.log(err) })
   }
 
+  handleExistingBasketItem(existingBasketItem: any) {
+    const newQuantity = existingBasketItem.quantity + 1
+    this.basketService.put(existingBasketItem.id, { quantity: newQuantity }).subscribe((updatedBasketItem) => {
+      this.productService.get(updatedBasketItem.ProductId).subscribe((product) => {
+        this.translateService.get('BASKET_ADD_SAME_PRODUCT', { product: product.name }).subscribe((basketAddSameProduct) => {
+          this.snackBarHelperService.open(basketAddSameProduct, 'confirmBar')
+          this.basketService.updateNumberOfCartItems()
+        }, (translationId) => {
+          this.snackBarHelperService.open(translationId, 'confirmBar')
+          this.basketService.updateNumberOfCartItems()
+        })
+      }, (err) => { console.log(err) })
+    }, (err) => {
+      this.snackBarHelperService.open(err.error?.error, 'errorBar')
+      console.log(err)
+    })
+  }
+
   isLoggedIn () {
     return localStorage.getItem('token')
   }
 
   onResize (event: any) {
-    if (event.target.innerWidth < 2600) {
-      this.breakpoint = 4
-      if (event.target.innerWidth < 1740) {
-        this.breakpoint = 3
-        if (event.target.innerWidth < 1280) {
-          this.breakpoint = 2
-          if (event.target.innerWidth < 850) {
-            this.breakpoint = 1
-          }
-        }
-      }
-    } else {
-      this.breakpoint = 6
-    }
+    this.updateBreakpoint(event.target.innerWidth);
   }
 
   isDeluxe () {
