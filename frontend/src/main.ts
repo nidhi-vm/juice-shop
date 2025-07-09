@@ -6,7 +6,6 @@
 import { enableProdMode, importProvidersFrom } from '@angular/core'
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
 
-import { AppModule, HttpLoaderFactory } from './app/app.module'
 import { environment } from './environments/environment'
 import { AppComponent } from './app/app.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -48,7 +47,6 @@ import { GalleryModule } from 'ng-gallery';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { Routing } from './app/app.routing';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
@@ -93,7 +91,7 @@ bootstrapApplication(AppComponent, {
         importProvidersFrom(BrowserModule, Routing, TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,
-                useFactory: HttpLoaderFactory,
+                useFactory: () => new TranslateHttpLoader(HttpClient),
                 deps: [HttpClient]
             }
         }), CookieModule.forRoot(), FlexLayoutModule, ReactiveFormsModule, GalleryModule, NgxTextDiffModule, QrCodeModule, FileUploadModule, ClipboardModule, MatToolbarModule, MatIconModule, FormsModule, MatFormFieldModule, MatSelectModule, MatButtonModule, MatSidenavModule, MatRippleModule, MatTableModule, MatPaginatorModule, MatCardModule, MatInputModule, MatCheckboxModule, MatDialogModule, MatDividerModule, MatDatepickerModule, MatNativeDateModule, MatExpansionModule, MatProgressBarModule, MatTooltipModule, MatMenuModule, MatListModule, MatButtonToggleModule, LayoutModule, MatGridListModule, MatBadgeModule, MatRadioModule, MatSnackBarModule, MatSliderModule, MatTabsModule, MatSlideToggleModule, MatChipsModule, MatAutocompleteModule, HighlightModule),
