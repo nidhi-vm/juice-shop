@@ -60,7 +60,7 @@ export function getLanguageList () { // TODO Refactor and extend to also load ba
       return await new Promise((resolve, reject) => {
         try {
           for (const key in fileContent) {
-            if (Object.prototype.hasOwnProperty.call(fileContent, key) && fileContent[key] !== enContent[key]) {
+            if (Object.hasOwn(fileContent, key) && fileContent[key] !== enContent[key]) {
               differentStrings++
             }
           }
